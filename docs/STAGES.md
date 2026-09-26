@@ -11,7 +11,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | ✅ done | see `backend/README.md` |
 | 5 | AI module: Gemini-based review/debug/chat/authoring endpoints (mocked in tests) | ✅ done | see `backend/README.md` |
 | 6 | Admin module: role-gated problem/contest CRUD | ✅ done | see `backend/README.md` |
-| 7 | Compiler service (Java): execution engine for C/C++/Java/Python + Dockerfile + tests | pending | |
+| 7 | Compiler service (Java): execution engine for C/C++/Java/Python + tests | ✅ done | see `compiler/README.md`; its Dockerfile lands in Stage 9 |
 | 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | pending | |
 | 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | pending | |
 | 10 | Deploy configs: `render.yaml`, `vercel.json`, MongoDB Atlas setup docs | pending | |
@@ -88,3 +88,16 @@ Each stage is implemented and committed independently, with tests, before moving
 - **Full test-case visibility for the owning admin**: `AdminProblemResponse` (used only for create/update,
   where the requester is verified to be the problem's own creator) includes every test case, unlike
   `ProblemDetailResponse` (Stage 2), which only ever shows the public ones.
+- **Compiler service isolation and timeouts**: each execution runs in its own freshly created temp directory
+  (deleted afterward), so concurrent submissions never collide — the original wrote every submission into one
+  shared `codes/`/`inputs/` folder and had to generate a unique Java class name per submission to work around
+  it; here submitted Java code just defines `public class Main` directly. `ProcessRunner` enforces a
+  configurable wall-clock timeout on every run step (the original had none — an infinite loop hung forever)
+  and drains stdout/stderr on background threads while writing stdin, avoiding the classic `ProcessBuilder`
+  deadlock. A Python `SyntaxError` is classified as `COMPILATION_ERROR` (matching a judge's usual convention),
+  matching the original's own string-matching heuristic. Per-execution memory limiting is out of scope here —
+  the container this service runs in gets an overall memory cap at the deployment level instead (Stage 9/10);
+  the original declared a `pidusage` dependency for this but never actually used it.
+- **Compiler service tests exercise the real toolchain**: `CodeExecutionServiceTest` runs actual `gcc`/`g++`/
+  `python3`/`javac` rather than mocking them, since GitHub Actions' `ubuntu-latest` runners already have all
+  four installed — no Docker/Testcontainers needed for this module's tests.
