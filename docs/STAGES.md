@@ -10,7 +10,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 3 | Contests module: entity + leaderboard logic + tests | ✅ done | no explicit "join" step — a leaderboard entry is created on first submission (Stage 4) |
 | 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | ✅ done | see `backend/README.md` |
 | 5 | AI module: Gemini-based review/debug/chat/authoring endpoints (mocked in tests) | ✅ done | see `backend/README.md` |
-| 6 | Admin module: role-gated management endpoints | pending | |
+| 6 | Admin module: role-gated problem/contest CRUD | ✅ done | see `backend/README.md` |
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + Dockerfile + tests | pending | |
 | 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | pending | |
 | 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | pending | |
@@ -74,3 +74,17 @@ Each stage is implemented and committed independently, with tests, before moving
   (`POST /v1beta/models/{model}:generateContent`) directly through a small `GeminiClient` interface, the same
   pattern used for the compiler service — deliberately avoiding a dependency on a Java GenAI SDK whose exact
   API surface couldn't be verified against real Maven Central artifacts the way the plain REST contract could.
+- **Admin validators actually run**: the original wrote `validateProblem`/`validateContest` functions that were
+  never invoked by any controller — problem/contest creation only ever got Mongoose's schema-level checks
+  (and contest updates got none at all). The rewrite validates every create/update through Bean Validation on
+  the request DTO plus explicit service-level checks: topics must be in the allowed list, a contest's
+  problem ids must reference problems that actually exist (the original never checked this, so a contest
+  could reference a deleted or nonexistent problem), and `endTime` must be after `startTime`.
+- **Admin delete cascade actually works**: the original's `deleteProblem`/`deleteContest` referenced a
+  `Submission` model that was never imported in `AdminController.js` — the cascade line threw a
+  `ReferenceError` every time, so both admin-delete endpoints always returned 500 in practice. The rewrite's
+  `AdminService` genuinely deletes a problem's submissions and clears `contestId` on a deleted contest's
+  submissions.
+- **Full test-case visibility for the owning admin**: `AdminProblemResponse` (used only for create/update,
+  where the requester is verified to be the problem's own creator) includes every test case, unlike
+  `ProblemDetailResponse` (Stage 2), which only ever shows the public ones.

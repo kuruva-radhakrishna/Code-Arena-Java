@@ -101,3 +101,20 @@ All AI endpoints require authentication (the original had none at all) and call 
   for the admin to review before actually creating the problem (Stage 6).
 
 Any Gemini failure (unreachable, malformed response) surfaces as `502 Bad Gateway`.
+
+## Admin
+
+All `/api/admin/**` endpoints require the `ADMIN` role. Ownership is enforced per-resource: an admin can only
+update/delete problems or contests they created themselves.
+
+- `GET /api/admin/problems` — problems created by the caller.
+- `POST /api/admin/problems` / `PUT /api/admin/problems/{id}` — `{problemName, description, constraints,
+  testCases, difficulty, topics, hints}` → the full problem, including every test case (not just public
+  ones — unlike the public-facing problem endpoints, the requester here is verified to be its owner).
+- `DELETE /api/admin/problems/{id}` — deletes the problem and all of its submissions.
+- `GET /api/admin/contests` — contests created by the caller.
+- `POST /api/admin/contests` / `PUT /api/admin/contests/{id}` — `{contestTitle, description, startTime,
+  endTime, problems: [{problemId, points?}]}` (at least 3 problems, `points` defaults to 4, every `problemId`
+  must reference an existing problem). Updating a contest that has already started is rejected.
+- `DELETE /api/admin/contests/{id}` — deletes the contest and clears `contestId` on its submissions (they
+  remain as ordinary practice submissions).
