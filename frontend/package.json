@@ -10,11 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.14.17",
     "@mui/material": "^5.15.14",
     "axios": "^1.10.0",
-    "mui": "^0.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-draggable": "^4.5.0",
