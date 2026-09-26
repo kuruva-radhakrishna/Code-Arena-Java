@@ -21,7 +21,14 @@ jobs:
           cache-dependency-path: backend/pom.xml
       - name: Build and test
         working-directory: backend
-        run: ./mvnw -B verify
+        run: |
+          set +e
+          ./mvnw -B verify 2>&1 | tee build.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            grep -E "^\[ERROR\]" build.log | sed 's/^/::error::/'
+          fi
+          exit $status
 
   compiler:
     name: Compiler service (build + test)
@@ -37,7 +44,14 @@ jobs:
           cache-dependency-path: compiler/pom.xml
       - name: Build and test
         working-directory: compiler
-        run: ./mvnw -B verify
+        run: |
+          set +e
+          ./mvnw -B verify 2>&1 | tee build.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            grep -E "^\[ERROR\]" build.log | sed 's/^/::error::/'
+          fi
+          exit $status
 
   frontend:
     name: Frontend (lint + build)
