@@ -3,6 +3,7 @@ package com.codearena.backend.submission;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,7 +68,7 @@ class SubmissionServiceTest {
     void setUp() {
         submissionService = new SubmissionService(
                 submissionRepository, problemService, problemRepository, contestService, contestRepository, compilerClient);
-        when(submissionRepository.save(any())).thenAnswer(inv -> {
+        lenient().when(submissionRepository.save(any())).thenAnswer(inv -> {
             Submission s = inv.getArgument(0);
             s.setId("submission-1");
             return s;
