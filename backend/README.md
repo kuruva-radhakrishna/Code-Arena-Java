@@ -108,6 +108,8 @@ All `/api/admin/**` endpoints require the `ADMIN` role. Ownership is enforced pe
 update/delete problems or contests they created themselves.
 
 - `GET /api/admin/problems` — problems created by the caller.
+- `GET /api/admin/problems/{id}` — full detail of one of the caller's own problems, including hidden test
+  cases (unlike the public `GET /api/problems/{id}`) — meant for prefilling an edit form.
 - `POST /api/admin/problems` / `PUT /api/admin/problems/{id}` — `{problemName, description, constraints,
   testCases, difficulty, topics, hints}` → the full problem, including every test case (not just public
   ones — unlike the public-facing problem endpoints, the requester here is verified to be its owner).

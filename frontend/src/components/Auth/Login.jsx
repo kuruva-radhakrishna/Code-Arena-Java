@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import TextField from '@mui/material/TextField';
@@ -7,42 +6,35 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import InputAdornment from '@mui/material/InputAdornment';
 import './Login.css';
+import api from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  Email as EmailIcon, 
-  Lock as LockIcon, 
+import {
+  Email as EmailIcon,
+  Lock as LockIcon,
   Login as LoginIcon,
   PersonAdd as SignUpIcon,
   School as SchoolIcon
 } from '@mui/icons-material';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const { setUser } = useAuth();
+    const { login } = useAuth();
     const [success, setSuccess] = useState("");
 
     const handleSubmit = async function (e) {
         e.preventDefault();
         setError("");
         try {
-            const result = await axios.post(`${BACKEND_URL}/login`, {
-                email,
-                password
-            }, {
-                withCredentials: true
-            });
-            console.log(result);
-            setUser(result.data.user);
-            setSuccess("Problems loaded successfully!");
+            const result = await api.post('/api/auth/login', { email, password });
+            login(result.data.token, result.data.user);
+            setSuccess("Logged in successfully!");
             navigate('/');
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.error) {
-                setError(error.response.data.error);
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
             } else {
                 setError('Internal Server Error');
             }

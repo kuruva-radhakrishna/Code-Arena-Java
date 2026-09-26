@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../api/client';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../../contexts/AuthContext';
 import './NewProblem.css';
@@ -20,12 +20,10 @@ function NewProblem() {
   const [submitting, setSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
   if (loading) {
     return <div>Loading...</div>;
   }
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'ADMIN') {
     return <div>You are not authorized to create problems.</div>;
   }
 
@@ -50,17 +48,15 @@ function NewProblem() {
     setSubmitting(true);
     setMessage('');
     try {
-      await axios.post(`${BACKEND_URL}/admin/problems/new`, {
-        problem: {
-          problemName,
-          problemDescription,
-          Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
-          TestCases: testCases,
-          difficulty,
-          topics,
-          CreatedBy: user._id
-        }
-      }, { withCredentials: true });
+      await api.post('/api/admin/problems', {
+        problemName,
+        description: problemDescription,
+        constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
+        testCases,
+        difficulty: difficulty.toUpperCase(),
+        topics,
+        hints: []
+      });
       setMessage('Problem created successfully!');
       setProblemName(''); setProblemDescription(''); setConstraints(''); setTestCases([{ input: '', output: '', isPublic: true }]); setDifficulty('medium'); setTopics([]);
     } catch {
@@ -73,26 +69,22 @@ function NewProblem() {
     setMessage('');
     setAiLoading(true);
     try {
-      const result = await axios.post(`${BACKEND_URL}/ai/createProblem`, {
-        problem: {
-          problemName,
-          problemDescription,
-          Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
-          TestCases: testCases,
-          difficulty,
-          topics
-        }
-      }, { withCredentials: true });
+      const result = await api.post('/api/ai/problem-draft', {
+        problemName,
+        description: problemDescription || null,
+        difficulty: difficulty ? difficulty.toUpperCase() : null,
+        topics
+      });
 
-      const prob = result.data.problem;
-      if (prob) {
-        setProblemName(prob.problemName || problemName);
-        setProblemDescription(prob.problemDescription || problemDescription);
-        setConstraints((prob.Constraints || []).join('\n'));
-        setTopics(prob.topics || []);
-        setDifficulty(prob.difficulty || difficulty);
-        if (prob.TestCases && Array.isArray(prob.TestCases)) {
-          setTestCases(prob.TestCases);
+      const draft = result.data;
+      if (draft) {
+        setProblemName(draft.problemName || problemName);
+        setProblemDescription(draft.description || problemDescription);
+        setConstraints((draft.constraints || []).join('\n'));
+        setTopics(draft.topics || []);
+        setDifficulty(draft.difficulty ? draft.difficulty.toLowerCase() : difficulty);
+        if (draft.testCases && Array.isArray(draft.testCases)) {
+          setTestCases(draft.testCases);
         }
         setMessage('AI completed the problem!');
       } else {

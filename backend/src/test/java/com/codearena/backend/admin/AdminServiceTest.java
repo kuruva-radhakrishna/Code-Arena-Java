@@ -84,6 +84,29 @@ class AdminServiceTest {
     }
 
     @Test
+    void getMyProblem_returnsHiddenTestCasesToo_forTheOwningAdmin() {
+        Problem problem = Problem.builder().id("problem-1").problemName("Two Sum").createdBy("admin-1")
+                .testCases(List.of(
+                        com.codearena.backend.problem.TestCase.builder().input("in").output("out").isPublic(false).build()))
+                .build();
+        when(problemRepository.findById("problem-1")).thenReturn(Optional.of(problem));
+
+        AdminProblemResponse response = adminService.getMyProblem("admin-1", "problem-1");
+
+        assertThat(response.testCases()).hasSize(1);
+        assertThat(response.testCases().get(0).isPublic()).isFalse();
+    }
+
+    @Test
+    void getMyProblem_throwsForbidden_whenNotOwner() {
+        Problem problem = Problem.builder().id("problem-1").createdBy("someone-else").build();
+        when(problemRepository.findById("problem-1")).thenReturn(Optional.of(problem));
+
+        assertThatThrownBy(() -> adminService.getMyProblem("admin-1", "problem-1"))
+                .isInstanceOf(ForbiddenActionException.class);
+    }
+
+    @Test
     void createProblem_rejectsDuplicateName() {
         when(problemRepository.existsByProblemName("Two Sum Problem")).thenReturn(true);
 

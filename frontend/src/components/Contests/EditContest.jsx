@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function EditContest() {
   const [title, setTitle] = useState('');
@@ -22,22 +20,19 @@ function EditContest() {
   useEffect(() => {
     const fetchContestAndProblems = async function () {
       try {
-        console.log(id);
-        const contestRes = await axios.get(`${BACKEND_URL}/contests/${id}`, { withCredentials: true });
-        const problemsRes = await axios.get(`${BACKEND_URL}/problems/`, { withCredentials: true });
-        console.log(contestRes);
-        console.log(problemsRes);
+        const contestRes = await api.get(`/api/contests/${id}`);
+        const problemsRes = await api.get('/api/problems');
         const contest = contestRes.data;
         setTitle(contest.contestTitle || '');
         setStartTime(contest.startTime ? contest.startTime.slice(0, 16) : '');
         setEndTime(contest.endTime ? contest.endTime.slice(0, 16) : '');
         setDescription(contest.description || '');
         setAllProblems(problemsRes.data || []);
-        const selected = (contest.problems || []).map(p => p.problem_id._id || p.problem_id);
+        const selected = (contest.problems || []).map(p => p.problemId);
         setSelectedProblems(selected);
         const points = {};
         (contest.problems || []).forEach(p => {
-          points[p.problem_id._id || p.problem_id] = p.points;
+          points[p.problemId] = p.points;
         });
         setProblemPoints(points);
       } catch {
@@ -96,15 +91,13 @@ function EditContest() {
       return;
     }
     try {
-      await axios.patch(`${BACKEND_URL}/admin/contest/${id}/update`, {
-        contest: {
-          contestTitle: title,
-          startTime,
-          endTime,
-          problems: selectedProblems.map(pid => ({ problem_id: pid, points: Number(problemPoints[pid]) })),
-          description,
-        }
-      }, { withCredentials: true });
+      await api.put(`/api/admin/contests/${id}`, {
+        contestTitle: title,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        problems: selectedProblems.map(pid => ({ problemId: pid, points: Number(problemPoints[pid]) })),
+        description,
+      });
       navigate('/contests');
     } catch (err) {
       console.log(err);
@@ -116,10 +109,13 @@ function EditContest() {
     setAiLoading(true);
     setError('');
     try {
-      const res = await axios.post(`${BACKEND_URL}/ai/contest-description`, {
+      const problemNames = allProblems
+        .filter(p => selectedProblems.includes(p.id))
+        .map(p => p.problemName);
+      const res = await api.post('/api/ai/contest-description', {
         contestTitle: title,
-        problems: selectedProblems,
-      }, { withCredentials: true });
+        problemNames,
+      });
       setDescription(res.data.description || '');
     } catch {
       setError('AI completion failed');
@@ -154,15 +150,15 @@ function EditContest() {
           <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid #eee', borderRadius: 8, padding: 8, background: '#fafbfc', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {allProblems.length === 0 && <div>No problems found.</div>}
             {allProblems.map(problem => (
-              <div key={problem._id} style={{
+              <div key={problem.id} style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 16,
-                background: selectedProblems.includes(problem._id) ? '#e3f2fd' : '#fff',
-                border: selectedProblems.includes(problem._id) ? '2px solid #1976d2' : '1.5px solid #e0e0e0',
+                background: selectedProblems.includes(problem.id) ? '#e3f2fd' : '#fff',
+                border: selectedProblems.includes(problem.id) ? '2px solid #1976d2' : '1.5px solid #e0e0e0',
                 borderRadius: 10,
                 padding: '14px 18px',
-                boxShadow: selectedProblems.includes(problem._id) ? '0 2px 8px rgba(25,118,210,0.08)' : 'none',
+                boxShadow: selectedProblems.includes(problem.id) ? '0 2px 8px rgba(25,118,210,0.08)' : 'none',
                 transition: 'background 0.18s, border 0.18s, box-shadow 0.18s',
                 cursor: 'pointer',
                 minHeight: 72,
@@ -171,15 +167,15 @@ function EditContest() {
                 <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <input
                     type="checkbox"
-                    checked={selectedProblems.includes(problem._id)}
-                    onChange={() => handleProblemSelect(problem._id)}
+                    checked={selectedProblems.includes(problem.id)}
+                    onChange={() => handleProblemSelect(problem.id)}
                     style={{ marginRight: 16, accentColor: '#1976d2', width: 20, height: 20, alignSelf: 'flex-start' }}
                   />
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.97rem', color: '#1976d2', marginBottom: 4 }}>{problem.problemName || problem._id}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.97rem', color: '#1976d2', marginBottom: 4 }}>{problem.problemName || problem.id}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
-                    <span className={`difficulty-box ${problem.difficulty?.toLowerCase()}`} style={{ fontSize: '0.75rem', padding: '3px 10px', marginRight: 4 }}>{problem.difficulty}</span>
+                    <span className={`difficulty-box ${problem.difficulty?.toLowerCase()}`} style={{ fontSize: '0.75rem', padding: '3px 10px', marginRight: 4 }}>{problem.difficulty?.toLowerCase()}</span>
                     {problem.topics && problem.topics.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                         {problem.topics.map((topic, i) => (
@@ -189,12 +185,12 @@ function EditContest() {
                     )}
                   </div>
                 </div>
-                {selectedProblems.includes(problem._id) && (
+                {selectedProblems.includes(problem.id) && (
                   <input
                     type="number"
                     min={1}
-                    value={problemPoints[problem._id] || 4}
-                    onChange={e => handlePointsChange(problem._id, e.target.value)}
+                    value={problemPoints[problem.id] || 4}
+                    onChange={e => handlePointsChange(problem.id, e.target.value)}
                     style={{ width: 70, padding: 6, borderRadius: 6, border: '1.5px solid #1976d2', fontWeight: 600, fontSize: '1rem', background: '#f5f7fa', color: '#1976d2', outline: 'none', marginLeft: 8, alignSelf: 'flex-start' }}
                     placeholder="Points"
                   />

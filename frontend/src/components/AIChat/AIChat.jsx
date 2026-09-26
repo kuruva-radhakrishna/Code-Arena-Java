@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 import CircularProgress from '@mui/material/CircularProgress';
 import SendIcon from '@mui/icons-material/Send';
@@ -12,8 +12,6 @@ import { Rnd } from 'react-rnd';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ForumIcon from '@mui/icons-material/Forum';
 import './AIChat.css';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const AIChat = () => {
   const { user } = useAuth();
@@ -31,7 +29,7 @@ const AIChat = () => {
 
   // Helper to get user-specific key
   const getUserKey = (base) => {
-    return user && user._id ? `${base}_${user._id}` : base;
+    return user && user.id ? `${base}_${user.id}` : base;
   };
 
   // Initialize with welcome message or load from localStorage
@@ -88,10 +86,10 @@ const AIChat = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/ai/chat`, {
+      const response = await api.post('/api/ai/chat', {
         message: inputMessage,
         chatHistory: [...chatHistory, { role: 'user', content: inputMessage }].slice(-MAX_HISTORY)
-      }, { withCredentials: true });
+      });
 
       const aiMessage = {
         id: Date.now() + 1,

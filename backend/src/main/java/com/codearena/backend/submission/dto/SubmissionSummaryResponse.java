@@ -12,5 +12,6 @@ public record SubmissionSummaryResponse(
         Language language,
         Verdict verdict,
         Instant submittedAt,
-        boolean isInContest) {
+        boolean isInContest,
+        String contestId) {
 }

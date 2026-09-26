@@ -1,11 +1,9 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import "./Contests.css";
+import api from "../../api/client";
 import { useAuth } from "../../contexts/AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Contests() {
     const [contests, setContests] = useState([]);
@@ -18,9 +16,7 @@ function Contests() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const result = await axios.get(`${BACKEND_URL}/contests`, {
-                    withCredentials: true,
-                });
+                const result = await api.get('/api/contests');
                 setContests(result.data);
             } catch {
                 // ignore, contests list just stays empty
@@ -117,10 +113,10 @@ function Contests() {
                             const duration = getDuration(contest.startTime, contest.endTime);
                             const countdown = getCountdown(contest.startTime, contest.endTime);
                             return (
-                                <tr key={contest._id || index}>
+                                <tr key={contest.id || index}>
                                     <td>{index + 1}</td>
                                     <td>
-                                        <Link to={`/contests/${contest._id}`} className="contest-title-link">{contest.contestTitle}</Link>
+                                        <Link to={`/contests/${contest.id}`} className="contest-title-link">{contest.contestTitle}</Link>
                                     </td>
                                     <td>{date} at {time}</td>
                                     <td>{duration}</td>
@@ -145,7 +141,7 @@ function Contests() {
                     <CircularProgress size={60} thickness={5} />
                 </div>
             )}
-            {!loading && user && user.role === 'admin' && (
+            {!loading && user && user.role === 'ADMIN' && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
                     <Link to="/contests/new" className="create-contest-btn">Create Contest</Link>
                 </div>

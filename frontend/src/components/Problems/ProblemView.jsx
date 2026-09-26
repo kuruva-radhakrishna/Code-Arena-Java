@@ -2,7 +2,7 @@ import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import ProblemDescription from "./ProblemDescription";
 import ProblemSubmissions from "./ProblemSubmissions";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/client";
 import './ProblemView.css';
 import CodeEditor from './CodeEditor';
 import InputOutputConsole from './InputOutputConsole';
@@ -12,8 +12,9 @@ import ReactMarkdown from 'react-markdown';
 import ProblemDiscussion from "./ProblemDiscussion";
 import CircularProgress from '@mui/material/CircularProgress';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const COMPILER_URL = import.meta.env.VITE_COMPILER_URL;
+// The editor's language dropdown uses these lowercase values; the backend's
+// Language enum is uppercase.
+const LANGUAGE_TO_BACKEND = { c: 'C', cpp: 'CPP', java: 'JAVA', python: 'PYTHON' };
 
 function Problem(props) {
     const params = useParams();
@@ -55,18 +56,8 @@ function Problem(props) {
     // Fetch submissions
     const fetchSubmissions = async () => {
         try {
-            const result = await axios.get(`${BACKEND_URL}/submissions/${problemId}`, {
-                withCredentials: true
-            });
-            if (result && result.data) {
-                console.log(result.data);
-                const subs = result.data;
-                subs.sort((s1, s2) => new Date(s2.createdAt) - new Date(s1.createdAt));
-                console.log(subs);
-                setSubmissions(subs);
-            } else {
-                setSubmissions([]);
-            }
+            const result = await api.get(`/api/problems/${problemId}/submissions`);
+            setSubmissions(result && result.data ? result.data : []);
         } catch {
             setSubmissions([]);
         }
@@ -76,9 +67,7 @@ function Problem(props) {
     useEffect(() => {
         const fetchProblem = async () => {
             try {
-                const result = await axios.get(`${BACKEND_URL}/problems/${problemId}`, {
-                    withCredentials: true,
-                });
+                const result = await api.get(`/api/problems/${problemId}`);
                 if (!result.data) {
                     alert("Selected problem has been deleted.");
                     Navigate("/problems");
@@ -102,16 +91,15 @@ function Problem(props) {
     const handleRun = async () => {
         setRunLoading(true);
         try {
-            const result = await axios.post(`${COMPILER_URL}/run`, {
-                language,
+            const result = await api.post('/api/execute', {
+                language: LANGUAGE_TO_BACKEND[language] || language,
                 code,
                 input
-            }, { withCredentials: true });
-            if (result.data.output) {
-                setOutput(result.data.output.output);
-            }
-            if (result.data.errorType) {
-                setOutput(result.data.errorType);
+            });
+            if (result.data.status === 'SUCCESS') {
+                setOutput(result.data.output ?? '');
+            } else {
+                setOutput(`${result.data.status}: ${result.data.error || ''}`.trim());
             }
         } catch {
             setOutput('Run failed.');
@@ -121,20 +109,17 @@ function Problem(props) {
     const handleSubmit = async () => {
         setSubmitLoading(true);
         try {
-            const url = `${BACKEND_URL}/submissions/${problemId}`;
-            const payload = {
-                problem_id: problemId,
-                language,
+            const result = await api.post(`/api/problems/${problemId}/submissions`, {
+                language: LANGUAGE_TO_BACKEND[language] || language,
                 code,
-            };
-            const result = await axios.post(url, payload, { withCredentials: true });
-            setVerdicts(result.data.verdicts);
+            });
+            setVerdicts(result.data.testCaseVerdicts);
             setFailedCase(result.data.failedCase || null);
             setShowFailedCase(true);
             fetchSubmissions();
         } catch (error) {
             console.log(error);
-            setVerdicts([{ status: 'Submission failed.' }]);
+            setVerdicts(['Submission failed.']);
             setFailedCase(null);
         }
         setSubmitLoading(false);
@@ -142,9 +127,7 @@ function Problem(props) {
     const handleAIReview = async () => {
         setAIReviewClicked(true);
         try {
-            const result = await axios.post(`${BACKEND_URL}/ai/review`,
-                { code , problemId } , { withCredentials: true }
-            );
+            const result = await api.post('/api/ai/review', { code, problemId });
             setReview(result.data.review);
             setAIReviewClicked(false);
         } catch {
@@ -156,10 +139,10 @@ function Problem(props) {
         setDebugLoading(true);
         setDebugResult('');
         try {
-            const result = await axios.post(`${BACKEND_URL}/ai/debug`, {
+            const result = await api.post('/api/ai/debug', {
                 code,
-                problemDescription: problem.problemDescription
-            }, { withCredentials: true });
+                problemDescription: problem.description
+            });
             setDebugResult(result.data.debug);
         } catch {
             setDebugResult('AI debug failed.');

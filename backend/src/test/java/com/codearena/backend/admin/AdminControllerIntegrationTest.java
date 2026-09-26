@@ -131,6 +131,10 @@ class AdminControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
 
+        mockMvc.perform(get("/api/admin/problems/" + problemId).header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.testCases[0].isPublic", is(true)));
+
         mockMvc.perform(put("/api/admin/problems/" + problemId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -158,6 +162,10 @@ class AdminControllerIntegrationTest {
                         .header("Authorization", "Bearer " + otherAdminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validProblemPayload("Hijacked Name")))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/admin/problems/" + problem.getId())
+                        .header("Authorization", "Bearer " + otherAdminToken))
                 .andExpect(status().isForbidden());
     }
 

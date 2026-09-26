@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -11,6 +10,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import './SignUp.css';
+import api from '../../api/client';
 import { useAuth } from "../../contexts/AuthContext";
 import { 
   Person as PersonIcon,
@@ -29,9 +29,8 @@ function SignUp() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const navigate = useNavigate();
-    const { setUser } = useAuth();
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-    
+    const { login } = useAuth();
+
     const validateUser = () => {
         if (!firstname || firstname.trim().length < 2) return 'First name must be at least 2 characters.';
         if (!lastname || lastname.trim().length < 2) return 'Last name must be at least 2 characters.';
@@ -50,14 +49,13 @@ function SignUp() {
             return;
         }
         try {
-            const result =  await axios.post(`${BACKEND_URL}/register`,{
-                firstname : firstname,
-                lastname : lastname,
-                email : email,
-                password : password,
-                role : "user"
-            }, { withCredentials: true });
-            setUser(result.data.user);
+            const result = await api.post('/api/auth/register', {
+                firstname,
+                lastname,
+                email,
+                password
+            });
+            login(result.data.token, result.data.user);
             setSuccess('Registration successful! Redirecting...');
             setTimeout(() => navigate('/problems'), 1000);
         } catch (error) {

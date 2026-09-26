@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/client';
 import ReactMarkdown from 'react-markdown';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -20,37 +20,43 @@ function EditProblem() {
   const [testCases, setTestCases] = useState([{ input: '', output: '', isPublic: true }]);
   const [difficulty, setDifficulty] = useState('medium');
   const [topics, setTopics] = useState([]);
+  // Not editable in this form, but must be preserved on save - the backend
+  // replaces the whole problem on update, unlike the original's partial $set.
+  const [hints, setHints] = useState([]);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/problems/${id}`, { withCredentials: true });
+        // Full detail (including hidden test cases) for the owning admin -
+        // fetching the public GET /api/problems/:id here would only return
+        // public test cases and silently drop the hidden ones on save.
+        const res = await api.get(`/api/admin/problems/${id}`);
         const p = res.data;
         setProblemName(p.problemName || '');
-        setProblemDescription(p.problemDescription || '');
-        setConstraints((p.Constraints || []).join('\n'));
-        setTestCases(p.TestCases && p.TestCases.length > 0 ? p.TestCases : [{ input: '', output: '', isPublic: true }]);
-        setDifficulty(p.difficulty || 'medium');
+        setProblemDescription(p.description || '');
+        setConstraints((p.constraints || []).join('\n'));
+        setTestCases(p.testCases && p.testCases.length > 0 ? p.testCases : [{ input: '', output: '', isPublic: true }]);
+        setDifficulty(p.difficulty ? p.difficulty.toLowerCase() : 'medium');
         setTopics(p.topics || []);
+        setHints(p.hints || []);
       } catch {
         setMessage('Failed to fetch problem.');
       }
       setFetching(false);
     };
     fetchProblem();
-  }, [id, BACKEND_URL]);
+  }, [id]);
 
   if (loading || fetching) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}>
       <CircularProgress size={60} thickness={5} />
     </div>
   );
-  if (!user || user.role !== 'admin') return <div>You are not authorized to edit problems.</div>;
+  if (!user || user.role !== 'ADMIN') return <div>You are not authorized to edit problems.</div>;
 
   const handleTestCaseChange = (idx, field, value) => {
     setTestCases(tc => tc.map((t, i) => i === idx ? { ...t, [field]: value } : t));
@@ -72,26 +78,25 @@ function EditProblem() {
     setMessage('');
     setAiLoading(true);
     try {
-      const result = await axios.post(`${BACKEND_URL}/ai/createProblem`, {
-        problem: {
-          problemName,
-          problemDescription,
-          Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
-          TestCases: testCases,
-          difficulty,
-          topics
-        }
-      }, { withCredentials: true });
+      const result = await api.post('/api/ai/problem-draft', {
+        problemName,
+        description: problemDescription || null,
+        difficulty: difficulty ? difficulty.toUpperCase() : null,
+        topics
+      });
 
-      const prob = result.data.problem;
-      if (prob) {
-        setProblemName(prob.problemName || problemName);
-        setProblemDescription(prob.problemDescription || problemDescription);
-        setConstraints((prob.Constraints || []).join('\n'));
-        setTopics(prob.topics || []);
-        setDifficulty(prob.difficulty || difficulty);
-        if (prob.TestCases && Array.isArray(prob.TestCases)) {
-          setTestCases(prob.TestCases);
+      const draft = result.data;
+      if (draft) {
+        setProblemName(draft.problemName || problemName);
+        setProblemDescription(draft.description || problemDescription);
+        setConstraints((draft.constraints || []).join('\n'));
+        setTopics(draft.topics || []);
+        setDifficulty(draft.difficulty ? draft.difficulty.toLowerCase() : difficulty);
+        if (draft.testCases && Array.isArray(draft.testCases)) {
+          setTestCases(draft.testCases);
+        }
+        if (draft.hints && Array.isArray(draft.hints)) {
+          setHints(draft.hints);
         }
         setMessage('AI completed the problem!');
       } else {
@@ -99,7 +104,7 @@ function EditProblem() {
       }
     } catch (error) {
       console.log(error);
-      setMessage(error.response.data.message);
+      setMessage(error.response?.data?.message || 'AI completion failed.');
     }
     setAiLoading(false);
   };
@@ -109,16 +114,15 @@ function EditProblem() {
     setSubmitting(true);
     setMessage('');
     try {
-      await axios.patch(`${BACKEND_URL}/admin/problems/${id}/update`, {
-        problem: {
-          problemName,
-          problemDescription,
-          Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
-          TestCases: testCases,
-          difficulty,
-          topics
-        }
-      }, { withCredentials: true });
+      await api.put(`/api/admin/problems/${id}`, {
+        problemName,
+        description: problemDescription,
+        constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
+        testCases,
+        difficulty: difficulty.toUpperCase(),
+        topics,
+        hints
+      });
       setMessage('Problem updated successfully!');
       setTimeout(() => navigate('/profile'), 1200);
     } catch {

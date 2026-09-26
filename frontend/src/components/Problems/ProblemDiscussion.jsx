@@ -1,8 +1,6 @@
 import './ProblemDiscussion.css';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import api from '../../api/client';
 
 function ProblemDiscussion({ problemId }) {
     const [discussions, setDiscussions] = useState([]);
@@ -16,7 +14,7 @@ function ProblemDiscussion({ problemId }) {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.get(`${BACKEND_URL}/problems/${problemId}/discussions`, { withCredentials: true });
+            const res = await api.get(`/api/problems/${problemId}/discussions`);
             setDiscussions(res.data);
         } catch {
             setError('Failed to load discussions.');
@@ -36,7 +34,7 @@ function ProblemDiscussion({ problemId }) {
         setPosting(true);
         setPostError('');
         try {
-            await axios.post(`${BACKEND_URL}/problems/${problemId}/discussions`, { comment }, { withCredentials: true });
+            await api.post(`/api/problems/${problemId}/discussions`, { comment });
             setComment('');
             fetchDiscussions();
         } catch {

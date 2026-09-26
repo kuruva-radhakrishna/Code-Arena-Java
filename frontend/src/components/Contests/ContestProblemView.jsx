@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, Navigate, Link, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/client";
 import CodeEditor from '../Problems/CodeEditor';
 import InputOutputConsole from '../Problems/InputOutputConsole';
 import Verdict from '../Problems/Verdict';
-import ProblemDescription from '../Problems/ProblemDescription';
 import ContestProblemSubmissions from './ContestProblemSubmissions';
 import Box from '@mui/material/Box';
-import ReactMarkdown from 'react-markdown';
 import '../../App.css';
 import ContestProblemDescription from './ContestProblemDescription';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const COMPILER_URL = import.meta.env.VITE_COMPILER_URL;
+// The editor's language dropdown uses these lowercase values; the backend's
+// Language enum is uppercase.
+const LANGUAGE_TO_BACKEND = { c: 'C', cpp: 'CPP', java: 'JAVA', python: 'PYTHON' };
 
 function ContestProblemView() {
     const { contestId, problemId } = useParams();
@@ -49,7 +48,7 @@ function ContestProblemView() {
     useEffect(() => {
         const fetchContest = async function () {
             try {
-                const res = await axios.get(`${BACKEND_URL}/contests/${contestId}`, { withCredentials: true });
+                const res = await api.get(`/api/contests/${contestId}`);
                 setContest(res.data);
                 const start = new Date(res.data.startTime);
                 const end = new Date(res.data.endTime);
@@ -71,7 +70,7 @@ function ContestProblemView() {
         }
         const fetchProblem = async function () {
             try {
-                const result = await axios.get(`${BACKEND_URL}/problems/${problemId}`, { withCredentials: true });
+                const result = await api.get(`/api/problems/${problemId}`);
                 setProblem(result.data ?? null);
             } catch {
                 setProblem(null);
@@ -83,12 +82,10 @@ function ContestProblemView() {
 
     const fetchSubmissions = async () => {
         try {
-            const result = await axios.get(`${BACKEND_URL}/submissions/${problemId}`, { withCredentials: true });
+            const result = await api.get(`/api/problems/${problemId}/submissions`);
             let filtered = result.data;
-            if (contestId && contestStatus === "ongoing") {
-                filtered = filtered.filter(
-                    (sub) => sub.contest_id && sub.contest_id === contestId
-                );
+            if (contestId) {
+                filtered = filtered.filter((sub) => sub.contestId === contestId);
             }
             setSubmissions(filtered);
         } catch {
@@ -130,16 +127,15 @@ function ContestProblemView() {
     const handleRun = async () => {
         setRunLoading(true);
         try {
-            const result = await axios.post(`${COMPILER_URL}/run`, {
-                language,
+            const result = await api.post('/api/execute', {
+                language: LANGUAGE_TO_BACKEND[language] || language,
                 code,
                 input
-            }, { withCredentials: true });
-            if (result.data.output) {
-                setOutput(result.data.output.output);
-            }
-            if (result.data.errorType) {
-                setOutput(result.data.errorType);
+            });
+            if (result.data.status === 'SUCCESS') {
+                setOutput(result.data.output ?? '');
+            } else {
+                setOutput(`${result.data.status}: ${result.data.error || ''}`.trim());
             }
         } catch {
             setOutput('Run failed.');
@@ -149,15 +145,13 @@ function ContestProblemView() {
     const handleSubmit = async () => {
         setSubmitLoading(true);
         try {
-            const url = `${BACKEND_URL}/contests/submission/${contestId}/${problemId}`;
+            const url = `/api/contests/${contestId}/problems/${problemId}/submissions`;
             const payload = {
-                submission: {
-                    language,
-                    code,
-                }
+                language: LANGUAGE_TO_BACKEND[language] || language,
+                code,
             };
-            const result = await axios.post(url, payload, { withCredentials: true });
-            setVerdicts(result.data);
+            const result = await api.post(url, payload);
+            setVerdicts(result.data.result.testCaseVerdicts);
             fetchSubmissions();
         } catch (error) {
             console.log(error.message);

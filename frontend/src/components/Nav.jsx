@@ -5,8 +5,7 @@ import Button from '@mui/material/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import './Nav.css';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
-import { 
+import {
   Code as CodeIcon, 
   EmojiEvents as ContestIcon, 
   Add as AddIcon, 
@@ -19,18 +18,14 @@ import {
 } from '@mui/icons-material';
 
 function Nav() {
-  const { user, setUser } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true });
-      setUser(null);
-      navigate('/login');
-    } catch {
-      // handle error
-    }
+  // JWT auth is stateless - there's no server-side session to invalidate, so
+  // logging out is just discarding the token client-side.
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -72,7 +67,7 @@ function Nav() {
             >
               Contests
             </Button>
-            {user.role === 'admin' && (
+            {user.role === 'ADMIN' && (
               <>
                 <Button 
                   color="inherit" 

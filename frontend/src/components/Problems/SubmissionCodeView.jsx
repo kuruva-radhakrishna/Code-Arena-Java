@@ -1,10 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../api/client';
 import './ProblemSubmissions.css';
 import CircularProgress from '@mui/material/CircularProgress';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function formatFormalDate(dateStr) {
   const date = new Date(dateStr);
@@ -29,7 +27,7 @@ function SubmissionCodeView() {
     const fetchSubmission = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${BACKEND_URL}/submissions/single/${id}`, { withCredentials: true });
+        const res = await api.get(`/api/submissions/${id}`);
         setSubmission(res.data);
         setError(null);
       } catch (err) {
@@ -51,8 +49,6 @@ function SubmissionCodeView() {
     let displayMsg = error;
     if (error === 'Submission not found') {
       displayMsg = 'Submission not found.';
-    } else if (error === 'You are not allowed to view this submission during the contest.') {
-      displayMsg = 'This problem is part of an ongoing contest. You are not allowed to view this submission now.';
     }
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '30vh' }}>

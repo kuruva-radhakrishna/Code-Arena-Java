@@ -50,6 +50,11 @@ public class AdminService {
         return problemRepository.findByCreatedBy(userId).stream().map(ProblemSummaryResponse::from).toList();
     }
 
+    /** Full detail (including hidden test cases) for one of the caller's own problems - e.g. to prefill an edit form. */
+    public AdminProblemResponse getMyProblem(String userId, String problemId) {
+        return AdminProblemResponse.from(findProblemOwnedBy(problemId, userId));
+    }
+
     public AdminProblemResponse createProblem(String userId, ProblemRequest request) {
         validateTopics(request.topics());
         if (problemRepository.existsByProblemName(request.problemName())) {

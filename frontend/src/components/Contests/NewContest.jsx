@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/client';
 import { useNavigate } from 'react-router-dom';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function NewContest() {
   const [title, setTitle] = useState('');
@@ -19,7 +17,7 @@ function NewContest() {
   useEffect(() => {
     async function fetchProblems() {
       try {
-        const res = await axios.get(`${BACKEND_URL}/problems/all`, { withCredentials: true });
+        const res = await api.get('/api/problems');
         setAllProblems(res.data || []);
       } catch {
         setAllProblems([]);
@@ -66,15 +64,13 @@ function NewContest() {
       return;
     }
     try {
-      await axios.post(`${BACKEND_URL}/admin/contest/new`, {
-        contest : {
-          contestTitle: title,
-          startTime,
-          endTime,
-          problems: selectedProblems.map(id => ({ problem_id: id, points: Number(problemPoints[id]) })),
-          description,
-        }
-      }, { withCredentials: true });
+      await api.post('/api/admin/contests', {
+        contestTitle: title,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        problems: selectedProblems.map(id => ({ problemId: id, points: Number(problemPoints[id]) })),
+        description,
+      });
       navigate('/contests');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create contest');
@@ -85,10 +81,13 @@ function NewContest() {
     setAiLoading(true);
     setError('');
     try {
-      const res = await axios.post(`${BACKEND_URL}/ai/contest-description`, {
+      const problemNames = allProblems
+        .filter(p => selectedProblems.includes(p.id))
+        .map(p => p.problemName);
+      const res = await api.post('/api/ai/contest-description', {
         contestTitle: title,
-        problems: selectedProblems,
-      }, { withCredentials: true });
+        problemNames,
+      });
       setDescription(res.data.description || '');
     } catch {
       setError('AI completion failed');
@@ -117,15 +116,15 @@ function NewContest() {
           <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid #eee', borderRadius: 8, padding: 8, background: '#fafbfc', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {allProblems.length === 0 && <div>No problems found.</div>}
             {allProblems.map(problem => (
-              <div key={problem._id} style={{
+              <div key={problem.id} style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 16,
-                background: selectedProblems.includes(problem._id) ? '#e3f2fd' : '#fff',
-                border: selectedProblems.includes(problem._id) ? '2px solid #1976d2' : '1.5px solid #e0e0e0',
+                background: selectedProblems.includes(problem.id) ? '#e3f2fd' : '#fff',
+                border: selectedProblems.includes(problem.id) ? '2px solid #1976d2' : '1.5px solid #e0e0e0',
                 borderRadius: 10,
                 padding: '14px 18px',
-                boxShadow: selectedProblems.includes(problem._id) ? '0 2px 8px rgba(25,118,210,0.08)' : 'none',
+                boxShadow: selectedProblems.includes(problem.id) ? '0 2px 8px rgba(25,118,210,0.08)' : 'none',
                 transition: 'background 0.18s, border 0.18s, box-shadow 0.18s',
                 cursor: 'pointer',
                 minHeight: 72,
@@ -134,15 +133,15 @@ function NewContest() {
                 <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <input
                     type="checkbox"
-                    checked={selectedProblems.includes(problem._id)}
-                    onChange={() => handleProblemSelect(problem._id)}
+                    checked={selectedProblems.includes(problem.id)}
+                    onChange={() => handleProblemSelect(problem.id)}
                     style={{ marginRight: 16, accentColor: '#1976d2', width: 20, height: 20, alignSelf: 'flex-start' }}
                   />
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.97rem', color: '#1976d2', marginBottom: 4 }}>{problem.problemName || problem._id}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.97rem', color: '#1976d2', marginBottom: 4 }}>{problem.problemName || problem.id}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
-                    <span className={`difficulty-box ${problem.difficulty?.toLowerCase()}`} style={{ fontSize: '0.75rem', padding: '3px 10px', marginRight: 4 }}>{problem.difficulty}</span>
+                    <span className={`difficulty-box ${problem.difficulty?.toLowerCase()}`} style={{ fontSize: '0.75rem', padding: '3px 10px', marginRight: 4 }}>{problem.difficulty?.toLowerCase()}</span>
                     {problem.topics && problem.topics.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                         {problem.topics.map((topic, i) => (
@@ -152,12 +151,12 @@ function NewContest() {
                     )}
                   </div>
                 </div>
-                {selectedProblems.includes(problem._id) && (
+                {selectedProblems.includes(problem.id) && (
                   <input
                     type="number"
                     min={1}
-                    value={problemPoints[problem._id] || 4}
-                    onChange={e => handlePointsChange(problem._id, e.target.value)}
+                    value={problemPoints[problem.id] || 4}
+                    onChange={e => handlePointsChange(problem.id, e.target.value)}
                     style={{ width: 70, padding: 6, borderRadius: 6, border: '1.5px solid #1976d2', fontWeight: 600, fontSize: '1rem', background: '#f5f7fa', color: '#1976d2', outline: 'none', marginLeft: 8, alignSelf: 'flex-start' }}
                     placeholder="Points"
                   />

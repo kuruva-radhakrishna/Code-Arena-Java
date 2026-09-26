@@ -9,7 +9,6 @@ function ContestProblemSubmissions({ submissions, refreshSubmissions }) {
                 <thead>
                     <tr>
                         <th>S.No</th>
-                        <th>User</th>
                         <th>Language</th>
                         <th>Verdict</th>
                         <th>Submitted At</th>
@@ -18,9 +17,8 @@ function ContestProblemSubmissions({ submissions, refreshSubmissions }) {
                 <tbody>
                     {submissions && submissions.length > 0 ? (
                         submissions.map((sub, idx) => (
-                            <tr key={sub._id}>
+                            <tr key={sub.id}>
                                 <td>{idx + 1}</td>
-                                <td>{sub.user_id?.firstname || 'User'} {sub.user_id?.lastname || ''}</td>
                                 <td>{sub.language}</td>
                                 <td>{sub.verdict}</td>
                                 <td>{new Date(sub.submittedAt).toLocaleString()}</td>
@@ -28,7 +26,7 @@ function ContestProblemSubmissions({ submissions, refreshSubmissions }) {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={5} style={{ textAlign: 'center' }}>No submissions found.</td>
+                            <td colSpan={4} style={{ textAlign: 'center' }}>No submissions found.</td>
                         </tr>
                     )}
                 </tbody>

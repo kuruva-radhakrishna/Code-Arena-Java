@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from 'axios';
+import api from '../api/client';
 import { Card, CardContent, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Divider, Button } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import './Profile.css';
@@ -7,8 +7,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Tooltip from '@mui/material/Tooltip';
 import CircularProgress from '@mui/material/CircularProgress';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function formatFormalDate(dateStr) {
     const date = new Date(dateStr);
@@ -33,8 +31,7 @@ function Profile() {
         const fetchProfile = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get(`${BACKEND_URL}/api/profile/summary`, { withCredentials: true });
-                console.log(res.data);
+                const res = await api.get('/api/profile/summary');
                 setProfileData(res.data);
             } catch {
                 // handle error
@@ -46,9 +43,6 @@ function Profile() {
     }, []);
 
     const isNewUser = profileData?.user && profileData.user.createdAt && (new Date() - new Date(profileData.user.createdAt)) < 7 * 24 * 60 * 60 * 1000;
-    if(profileData && profileData.submissionsByUser){
-        profileData.submissionsByUser.sort((s1,s2)=>s2.createdAt-s1.createdAt);
-    }
 
     if (!profileData || loading) {
         return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><CircularProgress size={60} thickness={5} /></div>;
@@ -57,12 +51,14 @@ function Profile() {
     const handleDeleteContest = async (contestId) => {
         if (!window.confirm('Are you sure you want to delete this contest? This action cannot be undone.')) return;
         try {
-            await axios.delete(`${BACKEND_URL}/contests/${contestId}`, { withCredentials: true });
+            // The original called DELETE /contests/:id here, which doesn't exist on that
+            // backend at all (only /admin/contests/:id does) - so this button never
+            // actually worked there. Using the real admin endpoint here.
+            await api.delete(`/api/admin/contests/${contestId}`);
             setDeleteMsg('Contest deleted successfully.');
-            // Optionally refresh profile data
             setProfileData(prev => ({
                 ...prev,
-                createdContests: prev.createdContests.filter(c => c._id !== contestId)
+                contestsCreatedByMe: prev.contestsCreatedByMe.filter(c => c.id !== contestId)
             }));
         } catch (error) {
             setDeleteMsg('Failed to delete contest.');
@@ -73,11 +69,11 @@ function Profile() {
     const handleDeleteProblem = async (problemId) => {
         if (!window.confirm('Are you sure you want to delete this problem? This action cannot be undone.')) return;
         try {
-            await axios.delete(`${BACKEND_URL}/admin/problems/${problemId}`, { withCredentials: true });
+            await api.delete(`/api/admin/problems/${problemId}`);
             setDeleteMsg('Problem deleted successfully.');
             setProfileData(prev => ({
                 ...prev,
-                problemsByUser: prev.problemsByUser.filter(p => p._id !== problemId)
+                problemsCreatedByMe: prev.problemsCreatedByMe.filter(p => p.id !== problemId)
             }));
         } catch (error) {
             setDeleteMsg('Failed to delete problem.');
@@ -196,13 +192,13 @@ function Profile() {
                                 </TableHead>
                                 <TableBody>
                                     {profileData.attendedContests.map((contest, idx) => (
-                                        <TableRow key={contest._id}>
+                                        <TableRow key={contest.contestId}>
                                             <TableCell>{idx + 1}</TableCell>
                                             <TableCell>
-                                                <Link to={`/contests/${contest._id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>{contest.contestTitle}</Link>
+                                                <Link to={`/contests/${contest.contestId}`} style={{ textDecoration: 'none', color: '#1976d2' }}>{contest.contestTitle}</Link>
                                             </TableCell>
                                             <TableCell>{formatFormalDate(contest.startTime)}</TableCell>
-                                            <TableCell>{contest.userStats ? contest.userStats.rank : '-'}</TableCell>
+                                            <TableCell>{contest.rank ?? '-'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -212,7 +208,7 @@ function Profile() {
                 )}
             </Box>
             {/* Contests Created By User Section */}
-            {profileData.createdContests && profileData.createdContests.length > 0 && (
+            {profileData.contestsCreatedByMe && profileData.contestsCreatedByMe.length > 0 && (
                 <Card className="profile-section-card">
                     <Typography className="profile-section-title">Contests You Created</Typography>
                     <TableContainer className="profile-table-container" component={Paper}>
@@ -228,26 +224,26 @@ function Profile() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {profileData.createdContests.map((contest, idx) => {
+                                {profileData.contestsCreatedByMe.map((contest, idx) => {
                                     const now = new Date();
                                     const start = new Date(contest.startTime);
                                     const canEdit = start > now;
                                     return (
-                                        <TableRow key={contest._id}>
+                                        <TableRow key={contest.id}>
                                             <TableCell>{idx + 1}</TableCell>
                                             <TableCell>
-                                                <Link to={`/contests/${contest._id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>{contest.contestTitle}</Link>
+                                                <Link to={`/contests/${contest.id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>{contest.contestTitle}</Link>
                                             </TableCell>
                                             <TableCell>{formatFormalDate(contest.startTime)}</TableCell>
                                             <TableCell>{formatFormalDate(contest.endTime)}</TableCell>
-                                            <TableCell>{contest.problems ? contest.problems.length : 0}</TableCell>
+                                            <TableCell>{contest.problemCount ?? 0}</TableCell>
                                             <TableCell>
                                                 {canEdit && (
-                                                    <Button variant="outlined" size="small" onClick={() => navigate(`/contests/${contest._id}/edit`)} style={{ minWidth: 0, padding: '2px 10px', marginRight: 6, borderColor: '#ffa116', color: '#ffa116', fontWeight: 600, background: 'linear-gradient(135deg, #fffbe6 0%, #fff3e0 100%)' }}>
+                                                    <Button variant="outlined" size="small" onClick={() => navigate(`/contests/${contest.id}/edit`)} style={{ minWidth: 0, padding: '2px 10px', marginRight: 6, borderColor: '#ffa116', color: '#ffa116', fontWeight: 600, background: 'linear-gradient(135deg, #fffbe6 0%, #fff3e0 100%)' }}>
                                                         Edit
                                                     </Button>
                                                 )}
-                                                <Button variant="outlined" size="small" color="error" onClick={() => handleDeleteContest(contest._id)} style={{ minWidth: 0, padding: '2px 10px', borderColor: '#f44336', color: '#f44336', fontWeight: 600, background: 'linear-gradient(135deg, #fff0f0 0%, #ffeaea 100%)' }}>
+                                                <Button variant="outlined" size="small" color="error" onClick={() => handleDeleteContest(contest.id)} style={{ minWidth: 0, padding: '2px 10px', borderColor: '#f44336', color: '#f44336', fontWeight: 600, background: 'linear-gradient(135deg, #fff0f0 0%, #ffeaea 100%)' }}>
                                                     Delete
                                                 </Button>
                                             </TableCell>
@@ -260,7 +256,7 @@ function Profile() {
                 </Card>
             )}
             {/* Problems You Created Section */}
-            {profileData.user && profileData.user.role === 'admin' && (
+            {profileData.user && profileData.user.role === 'ADMIN' && (
                 <Card className="profile-section-card">
                     <Typography className="profile-section-title">Problems You Created</Typography>
                     <TableContainer className="profile-table-container" component={Paper}>
@@ -274,17 +270,17 @@ function Profile() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {profileData.problemsByUser && profileData.problemsByUser.length > 0 ? (
-                                    profileData.problemsByUser.map((problem, idx) => (
-                                        <TableRow key={problem._id}>
+                                {profileData.problemsCreatedByMe && profileData.problemsCreatedByMe.length > 0 ? (
+                                    profileData.problemsCreatedByMe.map((problem, idx) => (
+                                        <TableRow key={problem.id}>
                                             <TableCell>{idx + 1}</TableCell>
                                             <TableCell>{problem.problemName}</TableCell>
-                                            <TableCell>{formatFormalDate(problem.CreatedAt)}</TableCell>
+                                            <TableCell>{formatFormalDate(problem.createdAt)}</TableCell>
                                             <TableCell>
-                                                <Button variant="outlined" size="small" component={Link} to={`/problems/${problem._id}/edit`} style={{ minWidth: 0, padding: '2px 10px', marginRight: 6, borderColor: '#1976d2', color: '#1976d2', fontWeight: 600, background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}>
+                                                <Button variant="outlined" size="small" component={Link} to={`/problems/${problem.id}/edit`} style={{ minWidth: 0, padding: '2px 10px', marginRight: 6, borderColor: '#1976d2', color: '#1976d2', fontWeight: 600, background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}>
                                                     Edit
                                                 </Button>
-                                                <Button variant="outlined" size="small" color="error" onClick={() => handleDeleteProblem(problem._id)} style={{ minWidth: 0, padding: '2px 10px', borderColor: '#f44336', color: '#f44336', fontWeight: 600, background: 'linear-gradient(135deg, #fff0f0 0%, #ffeaea 100%)' }}>
+                                                <Button variant="outlined" size="small" color="error" onClick={() => handleDeleteProblem(problem.id)} style={{ minWidth: 0, padding: '2px 10px', borderColor: '#f44336', color: '#f44336', fontWeight: 600, background: 'linear-gradient(135deg, #fff0f0 0%, #ffeaea 100%)' }}>
                                                     Delete
                                                 </Button>
                                             </TableCell>
@@ -316,22 +312,22 @@ function Profile() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {profileData.submissionsByUser && profileData.submissionsByUser.length > 0 ? (
-                                profileData.submissionsByUser.map((submission, index) => {
-                                    if (!submission || !submission._id || !submission.problem_id) return null;
+                            {profileData.recentSubmissions && profileData.recentSubmissions.length > 0 ? (
+                                profileData.recentSubmissions.map((submission, index) => {
+                                    if (!submission || !submission.id || !submission.problemId) return null;
                                     return (
-                                        <TableRow key={submission._id}>
+                                        <TableRow key={submission.id}>
                                             <TableCell>{index + 1}</TableCell>
                                             <TableCell>
-                                                <Link to={`/problem/${submission.problem_id._id || submission.problem_id}/description`} style={{ textDecoration: 'none', color: '#1976d2' }}>
-                                                    {submission.problem_id.problemName || submission.problem_id}
+                                                <Link to={`/problem/${submission.problemId}/description`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                                                    {submission.problemName || submission.problemId}
                                                 </Link>
                                             </TableCell>
                                             <TableCell>{submission.language}</TableCell>
                                             <TableCell>{submission.verdict}</TableCell>
                                             <TableCell>{formatFormalDate(submission.submittedAt)}</TableCell>
                                             <TableCell>
-                                                <Button variant="outlined" size="small" component={Link} to={`/submission/${submission._id}`} style={{ minWidth: 0, padding: '2px 10px', fontWeight: 600, borderColor: '#43a047', color: '#43a047', background: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)' }}>
+                                                <Button variant="outlined" size="small" component={Link} to={`/submission/${submission.id}`} style={{ minWidth: 0, padding: '2px 10px', fontWeight: 600, borderColor: '#43a047', color: '#43a047', background: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)' }}>
                                                     View Code
                                                 </Button>
                                             </TableCell>

@@ -1,11 +1,9 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import "./ContestView.css";
 import ReactMarkdown from 'react-markdown';
 import CircularProgress from '@mui/material/CircularProgress';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import api from "../../api/client";
 
 function ContestView({ contestId }) {
     const [contest, setContest] = useState(null);
@@ -16,10 +14,7 @@ function ContestView({ contestId }) {
     useEffect(() => {
         async function fetchContest() {
             try {
-                const res = await axios.get(
-                    `${BACKEND_URL}/contests/${contestId}`,
-                    { withCredentials: true }
-                );
+                const res = await api.get(`/api/contests/${contestId}`);
                 setContest(res.data);
                 const start = new Date(res.data.startTime);
                 const end = new Date(res.data.endTime);
@@ -27,7 +22,7 @@ function ContestView({ contestId }) {
                 else if (now >= start && now < end) setStatus("ongoing");
                 else setStatus("past");
             } catch (err) {
-                if (err.response && err.response.status === 400) {
+                if (err.response && err.response.status === 403) {
                     setStatus("notlive");
                 } else {
                     setError("Failed to load contest.");
@@ -129,15 +124,15 @@ function ProblemsSection({ contest }) {
                 </thead>
                 <tbody>
                     {contest.problems.map((p, idx) => (
-                        <tr key={p.problem_id._id || p.problem_id}>
+                        <tr key={p.problemId}>
                             <td>{idx + 1}</td>
                             <td>
                                 <Link
                                     className="problem-link"
-                                    to={`/contests/${contest._id}/problem/${p.problem_id._id || p.problem_id}/description`}
-                                    state={{ contestId: contest._id }}
+                                    to={`/contests/${contest.id}/problem/${p.problemId}/description`}
+                                    state={{ contestId: contest.id }}
                                 >
-                                    {p.problem_id.problemName ||
+                                    {p.problemName ||
                                         `Problem ${String.fromCharCode(65 + idx)}`}
                                 </Link>
                             </td>
@@ -159,10 +154,7 @@ function LeaderboardSection({ contestId }) {
     useEffect(() => {
         async function fetchLeaderboard() {
             try {
-                const res = await axios.get(
-                    `${BACKEND_URL}/contests/${contestId}/leaderboard`,
-                    { withCredentials: true }
-                );
+                const res = await api.get(`/api/contests/${contestId}/leaderboard`);
                 setLeaderboard(res.data);
             } catch {
                 setLeaderboard([]);
@@ -200,7 +192,7 @@ function LeaderboardSection({ contestId }) {
                     <tbody>
                         {leaderboard.map((entry, idx) => (
                             <tr
-                                key={entry.user._id}
+                                key={entry.user.id}
                                 className={`top-${idx + 1 <= 3 ? idx + 1 : ""}`}
                             >
                                 <td className="rank-cell">
@@ -224,14 +216,12 @@ function LeaderboardSection({ contestId }) {
 
                                 <td>{entry.totalPoints}</td>
 
-                                
 
-                                {entry.problems.map((submission, i) => (
+
+                                {entry.problems.map((standing, i) => (
                                     <td key={i}>
-                                        {submission?.verdict === "Accepted" ? (
+                                        {standing?.solvedAt ? (
                                             <span className="badge bg-success">✅</span>
-                                        ) : submission ? (
-                                            <span className="badge bg-danger">❌</span>
                                         ) : (
                                             ""
                                         )}

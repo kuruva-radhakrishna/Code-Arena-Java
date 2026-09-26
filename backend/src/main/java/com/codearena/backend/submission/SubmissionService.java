@@ -200,7 +200,7 @@ public class SubmissionService {
         return submissions.stream()
                 .map(s -> new SubmissionSummaryResponse(
                         s.getId(), s.getProblemId(), problemNamesById.get(s.getProblemId()),
-                        s.getLanguage(), s.getVerdict(), s.getSubmittedAt(), s.isInContest()))
+                        s.getLanguage(), s.getVerdict(), s.getSubmittedAt(), s.isInContest(), s.getContestId()))
                 .toList();
     }
 

@@ -29,15 +29,15 @@ function ProblemSubmissions({ submissions }) {
                 <tbody>
                     {submissions && submissions.length > 0 ? (
                         submissions.map((submission, index) => (
-                            <tr key={submission._id}>
+                            <tr key={submission.id}>
                                 <td>{index + 1}</td>
                                 <td>{submission.language}</td>
                                 <td>{submission.verdict}</td>
                                 <td>{formatFormalDate(submission.submittedAt)}</td>
                                 <td>
-                                    <Link to={`/submission/${submission._id}`} className="view-code-link">Code</Link>
+                                    <Link to={`/submission/${submission.id}`} className="view-code-link">Code</Link>
                                 </td>
-                                
+
                             </tr>
                         ))
                     ) : (

@@ -40,6 +40,12 @@ public class AdminController {
         return ResponseEntity.ok(adminService.listMyProblems(principal.id()));
     }
 
+    @GetMapping("/problems/{id}")
+    public ResponseEntity<AdminProblemResponse> getMyProblem(
+            @PathVariable String id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        return ResponseEntity.ok(adminService.getMyProblem(principal.id(), id));
+    }
+
     @PostMapping("/problems")
     public ResponseEntity<AdminProblemResponse> createProblem(
             @AuthenticationPrincipal AuthenticatedUser principal, @Valid @RequestBody ProblemRequest request) {

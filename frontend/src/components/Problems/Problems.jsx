@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; // Make sure to import axios
 import { Link } from "react-router-dom";
 import './Problems.css';
+import api from "../../api/client";
 import { useAuth } from "../../contexts/AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
 import ProblemFilters from './ProblemFilters';
-import { 
+import {
   CheckCircle as CheckCircleIcon,
   Code as CodeIcon,
   TrendingUp as TrendingUpIcon,
@@ -14,7 +14,6 @@ import {
 } from '@mui/icons-material';
 
 const DIFFICULTY_ORDER = { easy: 1, medium: 2, hard: 3 };
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Problems() {
     const [problems, setProblems] = useState([]);
@@ -34,10 +33,7 @@ function Problems() {
             setError("");
             setSuccess("");
             try {
-                const result = await axios.get(`${BACKEND_URL}/problems`, {
-                    withCredentials: true
-                });
-                console.log(result);
+                const result = await api.get('/api/problems');
                 if (!result || !result.data || result.data.length === 0) {
                     setError("Problems not found.");
                     setProblems([]);
@@ -66,7 +62,7 @@ function Problems() {
         const fetchSubmissions = async () => {
             if (!user) return;
             try {
-                const res = await axios.get(`${BACKEND_URL}/submissions/`, { withCredentials: true });
+                const res = await api.get('/api/submissions');
                 setSubmissions(res.data || []);
             } catch {
                 setSubmissions([]);
@@ -78,15 +74,14 @@ function Problems() {
     useEffect(() => {
         const set = new Set();
         (submissions || []).forEach(sub => {
-            if (!sub || !sub.problem_id) return; // null check
-            const pid = typeof sub.problem_id === 'object' ? sub.problem_id._id : sub.problem_id;
-            if (sub.verdict === 'Accepted' && pid) set.add(pid.toString());
+            if (!sub || !sub.problemId) return; // null check
+            if (sub.verdict === 'ACCEPTED') set.add(sub.problemId.toString());
         });
         setSolvedSet(set);
     }, [submissions]);
 
     // Filtering logic
-    let filteredProblems = [...problems].filter(p => p && p._id); // filter out null/malformed
+    let filteredProblems = [...problems].filter(p => p && p.id); // filter out null/malformed
     if (selectedTopic) {
         filteredProblems = filteredProblems.filter(p => {
             if (Array.isArray(p.topics)) {
@@ -98,7 +93,7 @@ function Problems() {
         });
     }
     if (selectedDifficulty === 'solved') {
-        filteredProblems = filteredProblems.filter(p => solvedSet.has(p._id?.toString()));
+        filteredProblems = filteredProblems.filter(p => solvedSet.has(p.id?.toString()));
     } else if (selectedDifficulty) {
         filteredProblems = filteredProblems.filter(p => (p.difficulty || '').toLowerCase() === selectedDifficulty);
     }
@@ -153,13 +148,13 @@ function Problems() {
                             </thead>
                             <tbody>
                                 {filteredProblems.map((p, index) => {
-                                    const isSolved = solvedSet.has(p._id?.toString());
+                                    const isSolved = solvedSet.has(p.id?.toString());
                                     return (
                                         <tr key={index} className={isSolved ? 'solved-problem-row' : ''}>
                                             <td style={{ paddingRight: 32 }}>{index + 1}</td>
                                             <td style={{ paddingRight: 32 }}>
                                                 <div className="problem-name-cell">
-                                                    <Link to={`/problem/${p._id}/description`} className={isSolved ? 'solved-problem-link' : ''}>{p.problemName}</Link>
+                                                    <Link to={`/problem/${p.id}/description`} className={isSolved ? 'solved-problem-link' : ''}>{p.problemName}</Link>
                                                     {isSolved && (
                                                         <span title="Solved" className="solved-tick" style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 6 }}>
                                                             <CheckCircleIcon style={{ color: '#43a047', fontSize: '1.2rem' }} />
@@ -168,7 +163,7 @@ function Problems() {
                                                 </div>
                                             </td>
                                             <td style={{ paddingRight: 32 }}>
-                                                <span className={`difficulty-box ${p.difficulty?.toLowerCase()}`}>{p.difficulty}</span>
+                                                <span className={`difficulty-box ${p.difficulty?.toLowerCase()}`}>{p.difficulty?.toLowerCase()}</span>
                                             </td>
                                             <td style={{ paddingRight: 32 }}>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
