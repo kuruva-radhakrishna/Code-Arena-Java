@@ -91,3 +91,81 @@ jobs:
       - name: Build
         working-directory: frontend
         run: npm run build
+
+  docker:
+    name: Docker (compose build + smoke test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build all images
+        run: |
+          set +e
+          docker compose build 2>&1 | tee build.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            tail -n 200 build.log | sed 's/^/::error::/'
+          fi
+          exit $status
+      - name: Start stack
+        run: docker compose up -d
+      - name: Wait for backend and smoke-test register/login
+        run: |
+          code=000
+          for i in $(seq 1 60); do
+            code=$(curl -s --connect-timeout 3 --max-time 10 \
+                -o register.json -w '%{http_code}' -X POST http://localhost:8080/api/auth/register \
+                -H "Content-Type: application/json" \
+                -d '{"firstname":"CI","lastname":"Smoke","email":"ci-smoke@example.com","password":"SmokeTest123"}' || echo 000)
+            [ "$code" = "201" ] && break
+            sleep 5
+          done
+          echo "final http status: $code"
+          cat register.json 2>/dev/null || true
+          if [ "$code" != "201" ] || ! grep -q '"token"' register.json; then
+            echo "::error::backend register smoke test failed (http $code): $(cat register.json 2>/dev/null)"
+            exit 1
+          fi
+      - name: Smoke-test compiler service
+        run: |
+          code=000
+          for i in $(seq 1 60); do
+            code=$(curl -s --connect-timeout 3 --max-time 15 \
+                -o execute.json -w '%{http_code}' -X POST http://localhost:8000/api/execute \
+                -H "Content-Type: application/json" \
+                -d '{"language":"PYTHON","code":"print(1 + 1)","input":""}' || echo 000)
+            [ "$code" = "200" ] && break
+            sleep 5
+          done
+          echo "final http status: $code"
+          cat execute.json 2>/dev/null || true
+          if [ "$code" != "200" ] || ! grep -q '"SUCCESS"' execute.json; then
+            echo "::error::compiler smoke test failed (http $code): $(cat execute.json 2>/dev/null)"
+            exit 1
+          fi
+      - name: Smoke-test frontend
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf --connect-timeout 3 --max-time 10 http://localhost:5173/ -o /dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::frontend never became reachable"
+          exit 1
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          # GitHub caps annotations at ~10 per step, so one-annotation-per-line
+          # (piping through "sed 's/^/::error::/'") silently drops most of a
+          # log dump. Pack each service's tail into a single annotation instead,
+          # using %0A to encode embedded newlines (per the workflow-command
+          # escaping rules), well under that cap.
+          for svc in mongo backend compiler frontend; do
+            msg=$(docker compose logs --no-color --tail=60 "$svc" 2>&1 \
+                | awk '{gsub(/%/,"%25"); gsub(/\r/,"%0D"); printf "%s%%0A", $0}')
+            echo "::error::[$svc]%0A$msg"
+          done
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
