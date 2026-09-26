@@ -133,3 +133,15 @@ Each stage is implemented and committed independently, with tests, before moving
 - **Mongo healthcheck added in Stage 9**: `backend` declares `depends_on: mongo: condition: service_healthy`,
   which needs Mongo to expose a healthcheck (`mongosh --eval "db.adminCommand('ping')"`) — without it Compose
   only waits for the container to *start*, not for `mongod` to actually be accepting connections yet.
+- **Real Spring Boot 4 bug found via the Docker smoke test, not the unit/integration test suite**: Spring Boot 4
+  split the old monolithic `spring-boot-autoconfigure` jar into per-technology modules, and moved MongoDB's own
+  connection properties (`uri`/`host`/`port`/`username`/`password`/`ssl`) from `spring.data.mongodb.*` to a new
+  `spring.mongodb.*` prefix — `spring.data.mongodb.*` is now Spring-Data-only (GridFS, auto-index, field
+  naming), with no `uri` field at all. `application.properties` still used the old prefix, so `MONGODB_URI` was
+  silently inert everywhere except the test suite, and the app always fell back to the Mongo Java driver's own
+  `localhost:27017` default — invisible in every environment tried before Stage 9, since `@SpringBootTest`
+  integration tests use `@ServiceConnection` with Testcontainers (`TestcontainersConfiguration.java`), which
+  wires a `MongoConnectionDetails` bean directly and never resolves the property by name at all. Confirmed by
+  downloading and reading the actual `spring-boot-mongodb` 4.1.1 sources from Maven Central, the same technique
+  used earlier in this project for other Spring Boot 4 breaking changes. Fixed by renaming the property to
+  `spring.mongodb.uri`.
