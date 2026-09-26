@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import SignUp from './components/Auth/SignUp';
 import Login from './components/Auth/Login';
 import Problems from './components/Problems/Problems';
@@ -13,7 +13,6 @@ import ContestDiscussions from './components/Contests/ContestDiscussions';
 import ContestSubmissions from './components/Contests/ContestSubmissions';
 import Nav from './components/Nav';
 import SubmissionCodeView from './components/Problems/SubmissionCodeView';
-import { useAuth } from './contexts/AuthContext';
 import Profile from './components/Profile';
 import Home from './components/Home';
 import NewProblem from './components/Problems/NewProblem';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Navigate, Link, Routes, Route } from "react-router-dom";
+import { useParams, Navigate, Link, Routes, Route } from "react-router-dom";
 import axios from "axios";
 import CodeEditor from '../Problems/CodeEditor';
 import InputOutputConsole from '../Problems/InputOutputConsole';
@@ -20,7 +20,6 @@ function ContestProblemView() {
     const [contest, setContest] = useState(null);
     const [contestStatus, setContestStatus] = useState("loading");
     const [problem, setProblem] = useState();
-    const [problemError, setProblemError] = useState(false);
     const [language, setLanguage] = useState('cpp');
     const [code, setCode] = useState('');
     const [input, setInput] = useState('');
@@ -59,7 +58,7 @@ function ContestProblemView() {
                     setContestStatus("ongoing");
                 }
                 else setContestStatus("not-ongoing");
-            } catch (err) {
+            } catch {
                 setContestStatus("not-ongoing");
             }
         }
@@ -73,16 +72,9 @@ function ContestProblemView() {
         const fetchProblem = async function () {
             try {
                 const result = await axios.get(`${BACKEND_URL}/problems/${problemId}`, { withCredentials: true });
-                if (result.data) {
-                    setProblem(result.data);
-                    setProblemError(false);
-                } else {
-                    setProblem(null);
-                    setProblemError(true);
-                }
-            } catch (err) {
+                setProblem(result.data ?? null);
+            } catch {
                 setProblem(null);
-                setProblemError(true);
             }
         }
         fetchProblem();

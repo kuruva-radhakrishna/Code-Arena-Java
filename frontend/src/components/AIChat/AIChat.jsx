@@ -29,10 +29,6 @@ const AIChat = () => {
   const prevSize = useRef(size);
   const prevPosition = useRef(position);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   // Helper to get user-specific key
   const getUserKey = (base) => {
     return user && user._id ? `${base}_${user._id}` : base;
@@ -113,7 +109,7 @@ const AIChat = () => {
       // Save to user-specific localStorage
       localStorage.setItem(getUserKey('aiChatMessages'), JSON.stringify(finalMessages));
       localStorage.setItem(getUserKey('aiChatHistory'), JSON.stringify(finalHistory));
-    } catch (error) {
+    } catch {
       const errorMessage = {
         id: Date.now() + 1,
         type: 'ai',
@@ -133,15 +129,6 @@ const AIChat = () => {
       e.preventDefault();
       handleSendMessage();
     }
-  };
-
-  const formatMessage = (content) => {
-    // Convert markdown-like formatting to HTML
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br>');
   };
 
   const clearChat = () => {
@@ -171,27 +158,6 @@ const AIChat = () => {
 
   const handleQuickAction = (action) => {
     setInputMessage(action);
-  };
-
-  const exportChat = () => {
-    const chatText = messages
-      .filter(msg => msg.type !== 'ai' || !msg.content.includes('Hello') || !msg.content.includes('👋'))
-      .map(msg => {
-        const time = msg.timestamp.toLocaleString();
-        const sender = msg.type === 'ai' ? 'AI Assistant' : 'You';
-        return `[${time}] ${sender}: ${msg.content}`;
-      })
-      .join('\n\n');
-    
-    const blob = new Blob([chatText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ai-chat-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const handleExpand = () => {
