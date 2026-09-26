@@ -66,7 +66,10 @@ class JwtServiceTest {
     @Test
     void parseClaims_throws_whenSignedWithDifferentSecret() {
         JwtService issuer = new JwtService(SECRET, 60_000);
-        JwtService verifier = new JwtService("a-completely-different-secret-0123456789ABCDEF", 60_000);
+        // Deliberately the same length as SECRET so both keys land in the same HMAC
+        // strength tier - otherwise a shorter "wrong" key throws WeakKeyException
+        // instead of the SignatureException this test means to exercise.
+        JwtService verifier = new JwtService("a-completely-different-secret-key-0123456789ABCDEF-XYZ", 60_000);
         String token = issuer.generateToken(sampleUser());
 
         assertThatThrownBy(() -> verifier.parseClaims(token)).isInstanceOf(io.jsonwebtoken.security.SignatureException.class);
