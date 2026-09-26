@@ -13,7 +13,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 6 | Admin module: role-gated problem/contest CRUD | ✅ done | see `backend/README.md` |
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + tests | ✅ done | see `compiler/README.md`; its Dockerfile lands in Stage 9 |
 | 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | ✅ done | see `frontend/README.md`; kept the frontend structurally identical, only the data layer changed |
-| 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | pending | |
+| 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | ✅ done | |
 | 10 | Deploy configs: `render.yaml`, `vercel.json`, MongoDB Atlas setup docs | pending | |
 | 11 | Polish: README overhaul, final smoke-test pass | pending | |
 
@@ -117,3 +117,19 @@ Each stage is implemented and committed independently, with tests, before moving
   only tracks per-problem points and solved-at, not full submission history, so the frontend can no longer
   distinguish "attempted but still wrong" from "never attempted" the way the original's embedded 2D submission
   array could. A minor, deliberate loss of granularity in exchange for not duplicating submission history.
+- **Frontend Dockerfile is dev-mode only**: it runs Vite's dev server (`npm run dev -- --host 0.0.0.0`), not a
+  production build behind a static server — production hosting is Vercel (Stage 10), which builds directly
+  from the repo and never uses this image. It exists purely so `docker compose up` gives a working full-stack
+  environment without installing Node locally.
+- **Compiler service runtime image needs a full JDK, not a JRE**: unlike the backend (which only ever runs
+  itself, so a JRE-only runtime stage is enough), the compiler service invokes `javac` on submitted Java code
+  at request time, so its runtime image keeps the JDK. `gcc`/`g++`/`python3` are installed the same way, since
+  the same reasoning applies to those languages.
+- **`JWT_SECRET`/`GEMINI_API_KEY` passed through, not hardcoded or defaulted, in docker-compose.yml**: written
+  as bare `- JWT_SECRET` entries (Compose's "pass through from host env if set" form) rather than
+  `JWT_SECRET=${JWT_SECRET:-}`, which would set an *empty* value in the container whenever the host doesn't
+  have it set and silently defeat the backend's own built-in dev-fallback secret. A root `.env.example`
+  documents these as optional.
+- **Mongo healthcheck added in Stage 9**: `backend` declares `depends_on: mongo: condition: service_healthy`,
+  which needs Mongo to expose a healthcheck (`mongosh --eval "db.adminCommand('ping')"`) — without it Compose
+  only waits for the container to *start*, not for `mongod` to actually be accepting connections yet.

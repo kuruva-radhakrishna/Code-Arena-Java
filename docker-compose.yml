@@ -9,9 +9,61 @@ services:
       MONGO_INITDB_DATABASE: codearena
     volumes:
       - mongo-data:/data/db
+      - ./infra/mongo-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # backend, compiler and frontend services are added in Stage 9 once their
-  # Dockerfiles exist (backend/Dockerfile, compiler/Dockerfile, frontend/Dockerfile).
+  compiler:
+    build: ./compiler
+    container_name: code-arena-compiler
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      EXECUTION_TIMEOUT_MS: 10000
+
+  backend:
+    build: ./backend
+    container_name: code-arena-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      # Internal, container-network hostnames - not reachable from the browser.
+      - MONGODB_URI=mongodb://mongo:27017/codearena
+      - COMPILER_URL=http://compiler:8000
+      # The browser's origin, since this is what the frontend is served on below.
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173
+      # Passed through only if set on the host/.env - otherwise the app falls
+      # back to its own built-in dev defaults (see backend/README.md). Never
+      # written here as `${VAR:-}`, which would set an *empty* env var in the
+      # container and defeat that fallback.
+      - JWT_SECRET
+      - JWT_EXPIRATION_MS
+      - GEMINI_API_KEY
+      - GEMINI_MODEL
+    depends_on:
+      mongo:
+        condition: service_healthy
+      compiler:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    container_name: code-arena-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      # The browser's own address for the backend, not the container-network one.
+      VITE_BACKEND_URL: http://localhost:8080
+    depends_on:
+      - backend
 
 volumes:
   mongo-data:

@@ -15,7 +15,7 @@ code-arena-java/
   compiler/    Spring Boot code-execution service (compiles/runs submitted C/C++/Java/Python)
   frontend/    React + Vite + MUI single-page app
   infra/       Local dev support files (Mongo init scripts, etc.)
-  docker-compose.yml   Local dev stack (Mongo now; backend/compiler/frontend added in Stage 9)
+  docker-compose.yml   Full local dev stack (Mongo, backend, compiler, frontend)
 ```
 
 ## Tech stack
@@ -30,13 +30,27 @@ code-arena-java/
 
 ## Local development
 
-Each module has its own README with setup details, added as that stage lands:
+The whole stack (MongoDB, backend, compiler service, frontend) runs with a single command:
 
-- `backend/README.md` (Stage 1+)
-- `compiler/README.md` (Stage 7+)
-- `frontend/README.md` (Stage 8+)
+```
+docker compose up --build
+```
 
-Full-stack local dev via Docker Compose is set up in Stage 9.
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080
+- Compiler service: http://localhost:8000 (only called internally by the backend)
+
+Copy [`.env.example`](.env.example) to `.env` first if you want to set a real `JWT_SECRET` or a
+`GEMINI_API_KEY` (AI endpoints fail without one) — anything left unset falls back to the backend's
+built-in dev defaults. Compose only passes these through if they're actually set in your shell/`.env`,
+so an unset `JWT_SECRET` still uses the backend's fallback rather than being overridden with an empty
+value.
+
+Each module also has its own README for running it standalone, outside Compose:
+
+- `backend/README.md`
+- `compiler/README.md`
+- `frontend/README.md`
 
 ## Status
 
