@@ -12,7 +12,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 5 | AI module: Gemini-based review/debug/chat/authoring endpoints (mocked in tests) | ✅ done | see `backend/README.md` |
 | 6 | Admin module: role-gated problem/contest CRUD | ✅ done | see `backend/README.md` |
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + tests | ✅ done | see `compiler/README.md`; its Dockerfile lands in Stage 9 |
-| 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | in progress | includes a small backend addendum, `GET /api/profile/summary` — the original had this as an inline route in `app.js`, missed across Stages 1-6 |
+| 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | ✅ done | see `frontend/README.md`; kept the frontend structurally identical, only the data layer changed |
 | 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | pending | |
 | 10 | Deploy configs: `render.yaml`, `vercel.json`, MongoDB Atlas setup docs | pending | |
 | 11 | Polish: README overhaul, final smoke-test pass | pending | |
@@ -101,3 +101,19 @@ Each stage is implemented and committed independently, with tests, before moving
 - **Compiler service tests exercise the real toolchain**: `CodeExecutionServiceTest` runs actual `gcc`/`g++`/
   `python3`/`javac` rather than mocking them, since GitHub Actions' `ubuntu-latest` runners already have all
   four installed — no Docker/Testcontainers needed for this module's tests.
+- **Frontend adaptation kept the app structurally identical**: same components, same routing, same UI — only
+  the data layer (API base URLs, endpoint paths, response field names, auth mechanism) changed. A shared
+  `src/api/client.js` axios instance now attaches JWT bearer tokens from `localStorage`, replacing
+  `withCredentials: true` session cookies everywhere. The editor's "Run" button now calls the backend
+  (`POST /api/execute`) instead of the compiler service directly, so the frontend only needs one backend
+  origin — `VITE_COMPILER_URL` is gone.
+- **Two more real gaps found while wiring the frontend up, fixed rather than reproduced**: `EditProblem.jsx`
+  would have fetched via the public `GET /api/problems/{id}` (public test cases only) and silently deleted a
+  problem's hidden test cases on the next save — fixed by adding `GET /api/admin/problems/{id}` (full detail,
+  ownership-checked). Profile.jsx's delete-contest button called `DELETE /contests/:id`, which never existed
+  on the original backend at all (only `/admin/contests/:id` did) — that button never actually worked there;
+  pointed it at the real endpoint instead of reproducing the dead one.
+- **Leaderboard UI shows solved/not-solved, not solved/wrong/never-attempted**: Stage 3's leaderboard model
+  only tracks per-problem points and solved-at, not full submission history, so the frontend can no longer
+  distinguish "attempted but still wrong" from "never attempted" the way the original's embedded 2D submission
+  array could. A minor, deliberate loss of granularity in exchange for not duplicating submission history.
