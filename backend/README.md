@@ -118,3 +118,13 @@ update/delete problems or contests they created themselves.
   must reference an existing problem). Updating a contest that has already started is rejected.
 - `DELETE /api/admin/contests/{id}` — deletes the contest and clears `contestId` on its submissions (they
   remain as ordinary practice submissions).
+
+## Profile
+
+- `GET /api/profile/summary` — requires auth → `{user, solvedStats, problemTotals, problemsCreatedByMe,
+  recentSubmissions, contestsCreatedByMe, attendedContests}`. `solvedStats`/`problemTotals` are
+  `{easy, medium, hard, total}` counts of distinct problems; `problemsCreatedByMe`/`contestsCreatedByMe` are
+  only populated for `ADMIN` accounts; `attendedContests` includes this user's rank/points/last-submission-time
+  for every contest they appear on the leaderboard of. This mirrors an inline route the original had directly
+  in `app.js` (not part of any controller), missed in Stages 1-6 and added here once the frontend adaptation
+  (Stage 8) surfaced that `Profile.jsx` depends on it.

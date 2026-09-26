@@ -14,4 +14,7 @@ public interface ContestRepository extends MongoRepository<Contest, String> {
 
     @Query("{ 'startTime': { '$lte': ?0 }, 'endTime': { '$gte': ?0 } }")
     List<Contest> findLiveContests(Instant now);
+
+    @Query("{ 'leaderBoard.userId': ?0 }")
+    List<Contest> findByLeaderBoardUserId(String userId);
 }

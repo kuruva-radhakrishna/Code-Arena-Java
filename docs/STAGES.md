@@ -12,7 +12,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 5 | AI module: Gemini-based review/debug/chat/authoring endpoints (mocked in tests) | ✅ done | see `backend/README.md` |
 | 6 | Admin module: role-gated problem/contest CRUD | ✅ done | see `backend/README.md` |
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + tests | ✅ done | see `compiler/README.md`; its Dockerfile lands in Stage 9 |
-| 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | pending | |
+| 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | in progress | includes a small backend addendum, `GET /api/profile/summary` — the original had this as an inline route in `app.js`, missed across Stages 1-6 |
 | 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | pending | |
 | 10 | Deploy configs: `render.yaml`, `vercel.json`, MongoDB Atlas setup docs | pending | |
 | 11 | Polish: README overhaul, final smoke-test pass | pending | |
