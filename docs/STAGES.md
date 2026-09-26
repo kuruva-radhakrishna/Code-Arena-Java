@@ -6,7 +6,7 @@ Each stage is implemented and committed independently, with tests, before moving
 |---|-------|--------|-------|
 | 0 | Scaffold: monorepo layout, root docs, CI skeleton, Docker Compose (Mongo) | ✅ done | |
 | 1 | Backend foundation: Spring Boot app, MongoDB, `User` model, JWT auth (register/login/me), Spring Security, tests | ✅ done | see `backend/README.md` |
-| 2 | Problems module: entity + CRUD/filter endpoints + tests | pending | |
+| 2 | Problems module: entity + read endpoints (list/detail/discussions) + tests | ✅ done | create/update/delete land in Stage 6 (Admin) |
 | 3 | Contests module: entity + join/leaderboard logic + tests | pending | |
 | 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | pending | |
 | 5 | AI module: Gemini-based review/debug endpoints (mocked in tests) | pending | |
@@ -29,7 +29,12 @@ Each stage is implemented and committed independently, with tests, before moving
   in the schema, the compiler service hanging on an unrecognized language, and the complete absence of
   execution timeouts (the Java compiler service enforces a process timeout and force-kill). Also fixed: the
   original `/register` endpoint accepted a client-supplied `role`, letting anyone self-register as admin — the
-  rewrite always creates new accounts as `USER`.
+  rewrite always creates new accounts as `USER`. Also: the original `getProblemById` returned every test
+  case, including hidden ones, to any caller — `GET /api/problems/{id}` now only ever returns test cases
+  marked public. And the original had two overlapping listing endpoints (`/problems/all` and `/problems/`)
+  where the "all" one let any logged-in user bypass the anti-cheat filtering meant to hide problems currently
+  locked in a live contest — the rewrite has a single `GET /api/problems` endpoint instead; the contest-lock
+  filtering itself is added in Stage 3 once the Contest entity exists.
 - **Verification**: this environment has no local JDK/Maven/Docker, and downloads from GitHub's release-asset
   CDN are blocked by network policy. Toolchains are declared in Dockerfiles/CI, not installed on the host —
   every stage's tests run via GitHub Actions, which provides Java, Maven, and Docker out of the box.

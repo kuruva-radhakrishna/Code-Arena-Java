@@ -41,3 +41,13 @@ Authentication is stateless JWT bearer tokens (`Authorization: Bearer <token>`),
   always created with role `USER`; there is no self-service way to register as `ADMIN`.
 - `POST /api/auth/login` — `{email, password}` → `200 {token, user}` / `401` on bad credentials.
 - `GET /api/auth/me` — requires a valid token → `200 {user}` / `401` if missing/invalid/expired.
+
+## Problems
+
+- `GET /api/problems` — requires auth → summaries of every problem (name, difficulty, topics, likes/dislikes).
+- `GET /api/problems/{id}` — public → problem detail. Only test cases marked public are ever included; hidden
+  test cases are never exposed over the API.
+- `GET /api/problems/{id}/discussions` — public → list of discussions, each with the commenter's public profile.
+- `POST /api/problems/{id}/discussions` — requires auth → `{comment}` → `201` with the new discussion.
+
+Creating/editing/deleting problems is an admin-only action, added in Stage 6.
