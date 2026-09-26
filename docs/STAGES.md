@@ -9,7 +9,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 2 | Problems module: entity + read endpoints (list/detail/discussions) + tests | ✅ done | create/update/delete land in Stage 6 (Admin) |
 | 3 | Contests module: entity + leaderboard logic + tests | ✅ done | no explicit "join" step — a leaderboard entry is created on first submission (Stage 4) |
 | 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | ✅ done | see `backend/README.md` |
-| 5 | AI module: Gemini-based review/debug endpoints (mocked in tests) | pending | |
+| 5 | AI module: Gemini-based review/debug/chat/authoring endpoints (mocked in tests) | ✅ done | see `backend/README.md` |
 | 6 | Admin module: role-gated management endpoints | pending | |
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + Dockerfile + tests | pending | |
 | 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | pending | |
@@ -62,3 +62,15 @@ Each stage is implemented and committed independently, with tests, before moving
   gated only by whether the underlying problem happened to be locked in a live contest. The rewrite requires
   authentication and keeps the contest-lock gating (a submission for a problem currently locked in a
   *different* live contest than the one it belongs to is hidden from everyone, not just the public).
+- **AI endpoints require auth, not preserved as fully public**: the original had zero auth on any `/ai/*`
+  route — anyone, logged in or not, could burn the app's Gemini quota for free. All AI endpoints now require
+  authentication; the two admin-authoring ones (drafting a problem, writing a contest description) require
+  the `ADMIN` role. The original's `/ai/review` also referenced a nonexistent `prob.description` field (the
+  schema field is `problemDescription`), so the problem's actual text was silently never included in the
+  prompt — not an issue in the rewrite since the field is just called `description` consistently. The
+  original's separate, never-implemented `/ai/generate-problem` stub (a pure echo, no real AI call) was
+  dropped rather than reproduced; `/ai/createProblem`'s real behavior is what became `/api/ai/problem-draft`.
+- **Gemini access via plain REST, not a client SDK**: calls Google's Generative Language REST API
+  (`POST /v1beta/models/{model}:generateContent`) directly through a small `GeminiClient` interface, the same
+  pattern used for the compiler service — deliberately avoiding a dependency on a Java GenAI SDK whose exact
+  API surface couldn't be verified against real Maven Central artifacts the way the plain REST contract could.

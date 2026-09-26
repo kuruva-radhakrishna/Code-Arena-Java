@@ -15,6 +15,10 @@ All configuration is env-var driven (see `src/main/resources/application.propert
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins | `http://localhost:5173` |
 | `COMPILER_URL` | Base URL of the compiler service (Stage 7) | `http://localhost:8000` |
 | `COMPILER_CONNECT_TIMEOUT_MS` / `COMPILER_READ_TIMEOUT_MS` | HTTP client timeouts for calls to the compiler service | `5000` / `15000` |
+| `GEMINI_API_KEY` | Google Gemini API key — **required** for any `/api/ai/**` endpoint to work | *(blank — app still starts, AI calls fail)* |
+| `GEMINI_MODEL` | Gemini model name | `gemini-2.5-flash` |
+| `GEMINI_BASE_URL` | Generative Language API base URL | `https://generativelanguage.googleapis.com` |
+| `GEMINI_CONNECT_TIMEOUT_MS` / `GEMINI_READ_TIMEOUT_MS` | HTTP client timeouts for Gemini calls | `5000` / `30000` |
 
 ## Running locally
 
@@ -82,3 +86,18 @@ the contest's problems. Creating/editing/deleting contests is admin-only, added 
   leaderboard: points are only awarded the first time a user gets `ACCEPTED` on a given problem.
 
 Grading calls out to the compiler service (`COMPILER_URL`, Stage 7) via `CompilerClient` for each test case.
+
+## AI
+
+All AI endpoints require authentication (the original had none at all) and call Gemini via plain REST
+(`GeminiClient`), same pattern as the compiler client.
+
+- `POST /api/ai/review` — `{code, problemId}` → `{review}` — code review in the context of a specific problem.
+- `POST /api/ai/debug` — `{code, problemDescription?}` → `{debug}`.
+- `POST /api/ai/chat` — `{message, chatHistory}` → `{response}` — general programming assistant chat.
+- `POST /api/ai/contest-description` — **admin only** — `{contestTitle, problemNames}` → `{description}`.
+- `POST /api/ai/problem-draft` — **admin only** — `{problemName, description?, difficulty?, topics?}` →
+  a completed problem draft (`problemName, description, constraints, testCases, difficulty, topics, hints`)
+  for the admin to review before actually creating the problem (Stage 6).
+
+Any Gemini failure (unreachable, malformed response) surfaces as `502 Bad Gateway`.
