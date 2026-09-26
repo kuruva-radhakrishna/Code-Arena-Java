@@ -83,7 +83,7 @@ public class ProblemService {
         return DiscussionResponse.from(discussion, author);
     }
 
-    Problem findProblemOrThrow(String id) {
+    public Problem findProblemOrThrow(String id) {
         return problemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Problem not found"));
     }

@@ -17,6 +17,10 @@ import com.codearena.backend.discussion.DiscussionResponse;
 import com.codearena.backend.problem.dto.ProblemDetailResponse;
 import com.codearena.backend.problem.dto.ProblemSummaryResponse;
 import com.codearena.backend.security.AuthenticatedUser;
+import com.codearena.backend.submission.SubmissionService;
+import com.codearena.backend.submission.dto.SubmissionResultResponse;
+import com.codearena.backend.submission.dto.SubmissionSummaryResponse;
+import com.codearena.backend.submission.dto.SubmitRequest;
 
 import jakarta.validation.Valid;
 
@@ -25,9 +29,11 @@ import jakarta.validation.Valid;
 public class ProblemController {
 
     private final ProblemService problemService;
+    private final SubmissionService submissionService;
 
-    public ProblemController(ProblemService problemService) {
+    public ProblemController(ProblemService problemService, SubmissionService submissionService) {
         this.problemService = problemService;
+        this.submissionService = submissionService;
     }
 
     @GetMapping
@@ -51,6 +57,21 @@ public class ProblemController {
             @AuthenticationPrincipal AuthenticatedUser principal,
             @Valid @RequestBody AddDiscussionRequest request) {
         DiscussionResponse response = problemService.addDiscussion(id, principal.id(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}/submissions")
+    public ResponseEntity<List<SubmissionSummaryResponse>> listMySubmissions(
+            @PathVariable String id, @AuthenticationPrincipal AuthenticatedUser principal) {
+        return ResponseEntity.ok(submissionService.listMineForProblem(principal.id(), id));
+    }
+
+    @PostMapping("/{id}/submissions")
+    public ResponseEntity<SubmissionResultResponse> submit(
+            @PathVariable String id,
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @Valid @RequestBody SubmitRequest request) {
+        SubmissionResultResponse response = submissionService.submit(id, principal.id(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

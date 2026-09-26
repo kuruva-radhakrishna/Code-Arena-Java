@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.codearena.backend.compiler.CompilerClientException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -16,6 +18,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleApiException(ApiException ex) {
         ApiError body = new ApiError(ex.getStatus().value(), ex.getStatus().getReasonPhrase(), ex.getMessage());
         return ResponseEntity.status(ex.getStatus()).body(body);
+    }
+
+    @ExceptionHandler(CompilerClientException.class)
+    public ResponseEntity<ApiError> handleCompilerUnavailable(CompilerClientException ex) {
+        ApiError body = new ApiError(HttpStatus.BAD_GATEWAY.value(), HttpStatus.BAD_GATEWAY.getReasonPhrase(),
+                "The compiler service is currently unavailable");
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

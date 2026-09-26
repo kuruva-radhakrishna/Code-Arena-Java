@@ -65,7 +65,7 @@ public class ContestService {
         return buildLeaderboard(findContestOrThrow(contestId));
     }
 
-    Contest findContestOrThrow(String id) {
+    public Contest findContestOrThrow(String id) {
         return contestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contest not found"));
     }

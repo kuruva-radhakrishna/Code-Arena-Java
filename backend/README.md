@@ -13,6 +13,8 @@ All configuration is env-var driven (see `src/main/resources/application.propert
 | `JWT_SECRET` | HMAC signing key for JWTs (32+ bytes) — **must** be set in every deployed environment | insecure dev-only fallback |
 | `JWT_EXPIRATION_MS` | Token lifetime in ms | `604800000` (7 days) |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins | `http://localhost:5173` |
+| `COMPILER_URL` | Base URL of the compiler service (Stage 7) | `http://localhost:8000` |
+| `COMPILER_CONNECT_TIMEOUT_MS` / `COMPILER_READ_TIMEOUT_MS` | HTTP client timeouts for calls to the compiler service | `5000` / `15000` |
 
 ## Running locally
 
@@ -61,4 +63,22 @@ Creating/editing/deleting problems is an admin-only action, added in Stage 6.
   total points descending, ties broken by earliest last-submission time.
 
 There's no separate "join" endpoint — a leaderboard entry is created the first time a user submits to one of
-the contest's problems (Stage 4). Creating/editing/deleting contests is admin-only, added in Stage 6.
+the contest's problems. Creating/editing/deleting contests is admin-only, added in Stage 6.
+
+## Submissions
+
+- `POST /api/execute` — requires auth → `{language, code, input}` → ad hoc execution against a single input,
+  relayed straight from the compiler service. Not persisted, not graded — backs the editor's "Run" button.
+- `POST /api/problems/{id}/submissions` — requires auth → `{language, code}` → grades against every one of the
+  problem's test cases (stopping at the first failure), persists a `Submission`, and returns the verdict.
+  `WRONG_ANSWER` only ever includes the failing input/expected/actual output when that test case is public.
+- `GET /api/problems/{id}/submissions` — requires auth → the caller's own submissions for that problem.
+- `GET /api/submissions` — requires auth → all of the caller's own submissions, newest first.
+- `GET /api/submissions/{id}` — requires auth → a single submission's detail. Hidden if its problem is
+  currently locked inside a *different* live contest than the one the submission belongs to (unlike the
+  original, which had no authentication on this endpoint at all).
+- `POST /api/contests/{contestId}/problems/{problemId}/submissions` — requires auth → same grading as above,
+  but against a contest's live window (`403` if the contest isn't currently active) and updates that contest's
+  leaderboard: points are only awarded the first time a user gets `ACCEPTED` on a given problem.
+
+Grading calls out to the compiler service (`COMPILER_URL`, Stage 7) via `CompilerClient` for each test case.

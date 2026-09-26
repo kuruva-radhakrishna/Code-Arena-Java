@@ -8,7 +8,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 1 | Backend foundation: Spring Boot app, MongoDB, `User` model, JWT auth (register/login/me), Spring Security, tests | ✅ done | see `backend/README.md` |
 | 2 | Problems module: entity + read endpoints (list/detail/discussions) + tests | ✅ done | create/update/delete land in Stage 6 (Admin) |
 | 3 | Contests module: entity + leaderboard logic + tests | ✅ done | no explicit "join" step — a leaderboard entry is created on first submission (Stage 4) |
-| 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | pending | |
+| 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | ✅ done | see `backend/README.md` |
 | 5 | AI module: Gemini-based review/debug endpoints (mocked in tests) | pending | |
 | 6 | Admin module: role-gated management endpoints | pending | |
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + Dockerfile + tests | pending | |
@@ -46,4 +46,19 @@ Each stage is implemented and committed independently, with tests, before moving
   than inventing new scope.
 - **Verification**: this environment has no local JDK/Maven/Docker, and downloads from GitHub's release-asset
   CDN are blocked by network policy. Toolchains are declared in Dockerfiles/CI, not installed on the host —
-  every stage's tests run via GitHub Actions, which provides Java, Maven, and Docker out of the box.
+  every stage's tests run via GitHub Actions, which provides Java, Maven, and Docker out of the box. The CI
+  workflow re-emits Maven `[ERROR]` lines and failing surefire reports as `::error::` annotations, since
+  GitHub's log viewer otherwise requires signing in to see full step output even on a public repo.
+- **Compiler contract fixed, not preserved**: the original compiler service had no response at all for an
+  unrecognized language (the request just hung) and returned errors with an implicit HTTP 200. The rewrite's
+  contract (`POST /api/execute` on the compiler service, implemented for real in Stage 7) always responds:
+  `SUCCESS`/`COMPILATION_ERROR`/`RUNTIME_ERROR`/`TIME_LIMIT_EXCEEDED` with HTTP 200 for any well-formed
+  request, and a real 4xx/5xx only for a malformed request or genuine internal failure.
+- **Submission grading**: `WRONG_ANSWER` details (input/expected/actual) are only ever returned to the
+  submitter when the failing test case is public — the original leaked hidden test-case content in the
+  failure response for a graded submission, same class of bug as Stage 2's problem-detail fix.
+- **Submission visibility**: the original's single-submission view (`GET /submissions/single/:id`) had *no
+  authentication at all* — anyone could read anyone else's submitted source code by guessing/enumerating IDs,
+  gated only by whether the underlying problem happened to be locked in a live contest. The rewrite requires
+  authentication and keeps the contest-lock gating (a submission for a problem currently locked in a
+  *different* live contest than the one it belongs to is hidden from everyone, not just the public).
