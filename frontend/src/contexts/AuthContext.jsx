@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
       try {
         const res = await axios.get(`${BACKEND_URL}/auth/check`, { withCredentials: true });
         setUser(res.data.user || null);
-      } catch (err) {
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);

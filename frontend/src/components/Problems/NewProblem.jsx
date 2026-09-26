@@ -50,7 +50,7 @@ function NewProblem() {
     setSubmitting(true);
     setMessage('');
     try {
-      const res = await axios.post(`${BACKEND_URL}/admin/problems/new`, {
+      await axios.post(`${BACKEND_URL}/admin/problems/new`, {
         problem: {
           problemName,
           problemDescription,
@@ -63,7 +63,7 @@ function NewProblem() {
       }, { withCredentials: true });
       setMessage('Problem created successfully!');
       setProblemName(''); setProblemDescription(''); setConstraints(''); setTestCases([{ input: '', output: '', isPublic: true }]); setDifficulty('medium'); setTopics([]);
-    } catch (err) {
+    } catch {
       setMessage('Error creating problem.');
     }
     setSubmitting(false);
@@ -98,7 +98,7 @@ function NewProblem() {
       } else {
         setMessage('AI did not return a valid problem.');
       }
-    } catch (error) {
+    } catch {
       setMessage('AI completion failed.');
     }
     setAiLoading(false);

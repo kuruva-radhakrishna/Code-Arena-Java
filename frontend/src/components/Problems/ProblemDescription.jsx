@@ -27,7 +27,7 @@ function ProblemDescription() {
                 } else {
                     setProblem(result.data);
                 }
-            } catch (err) {
+            } catch {
                 alert("Problem fetch error.");
                 Navigate("/problems");
             }

@@ -28,7 +28,7 @@ function Nav() {
       await axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true });
       setUser(null);
       navigate('/login');
-    } catch (err) {
+    } catch {
       // handle error
     }
   };

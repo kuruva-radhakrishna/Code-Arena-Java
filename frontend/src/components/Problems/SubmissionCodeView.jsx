@@ -1,4 +1,4 @@
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ProblemSubmissions.css';
@@ -20,13 +20,10 @@ function formatFormalDate(dateStr) {
 }
 
 function SubmissionCodeView() {
-  const { id, contestId } = useParams();
-  const location = useLocation();
+  const { id } = useParams();
   const [submission, setSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Try to get contestId from params or location.state
-  const contestIdParam = contestId || (location.state && location.state.contestId);
 
   useEffect(() => {
     const fetchSubmission = async () => {

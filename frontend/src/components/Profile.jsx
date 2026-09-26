@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
-import { useAuth } from "../contexts/AuthContext";
 import { Card, CardContent, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Divider, Button } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import './Profile.css';
@@ -25,7 +24,6 @@ function formatFormalDate(dateStr) {
 }
 
 function Profile() {
-    const { user } = useAuth();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [deleteMsg, setDeleteMsg] = useState("");
@@ -38,7 +36,7 @@ function Profile() {
                 const res = await axios.get(`${BACKEND_URL}/api/profile/summary`, { withCredentials: true });
                 console.log(res.data);
                 setProfileData(res.data);
-            } catch (error) {
+            } catch {
                 // handle error
             } finally {
                 setLoading(false);
@@ -47,11 +45,7 @@ function Profile() {
         fetchProfile();
     }, []);
 
-    // Calculate badges
-    const solvedTotal = profileData?.solvedStats?.total || 0;
-    const bestRank = profileData?.attendedContests?.length > 0 ? Math.min(...profileData.attendedContests.map(c => c.userStats?.rank || 9999)) : null;
     const isNewUser = profileData?.user && profileData.user.createdAt && (new Date() - new Date(profileData.user.createdAt)) < 7 * 24 * 60 * 60 * 1000;
-    const has100Solved = solvedTotal >= 100;
     if(profileData && profileData.submissionsByUser){
         profileData.submissionsByUser.sort((s1,s2)=>s2.createdAt-s1.createdAt);
     }
@@ -72,6 +66,21 @@ function Profile() {
             }));
         } catch (error) {
             setDeleteMsg('Failed to delete contest.');
+            console.error(error);
+        }
+    };
+
+    const handleDeleteProblem = async (problemId) => {
+        if (!window.confirm('Are you sure you want to delete this problem? This action cannot be undone.')) return;
+        try {
+            await axios.delete(`${BACKEND_URL}/admin/problems/${problemId}`, { withCredentials: true });
+            setDeleteMsg('Problem deleted successfully.');
+            setProfileData(prev => ({
+                ...prev,
+                problemsByUser: prev.problemsByUser.filter(p => p._id !== problemId)
+            }));
+        } catch (error) {
+            setDeleteMsg('Failed to delete problem.');
             console.error(error);
         }
     };

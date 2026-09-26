@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function formatFormalDate(dateStr) {
   const date = new Date(dateStr);
@@ -13,7 +13,7 @@ function formatFormalDate(dateStr) {
   return `${day} ${month} ${year} at ${hour}:${minute} ${ampm}`;
 }
 
-function ProblemSubmissions({ submissions, refreshSubmissions }) {
+function ProblemSubmissions({ submissions }) {
     return (
         <div className="problem-submissions">
             <table>

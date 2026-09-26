@@ -37,7 +37,7 @@ function EditProblem() {
         setTestCases(p.TestCases && p.TestCases.length > 0 ? p.TestCases : [{ input: '', output: '', isPublic: true }]);
         setDifficulty(p.difficulty || 'medium');
         setTopics(p.topics || []);
-      } catch (err) {
+      } catch {
         setMessage('Failed to fetch problem.');
       }
       setFetching(false);
@@ -121,7 +121,7 @@ function EditProblem() {
       }, { withCredentials: true });
       setMessage('Problem updated successfully!');
       setTimeout(() => navigate('/profile'), 1200);
-    } catch (err) {
+    } catch {
       setMessage('Error updating problem.');
     }
     setSubmitting(false);

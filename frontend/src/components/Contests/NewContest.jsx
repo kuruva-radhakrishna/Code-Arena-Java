@@ -21,7 +21,7 @@ function NewContest() {
       try {
         const res = await axios.get(`${BACKEND_URL}/problems/all`, { withCredentials: true });
         setAllProblems(res.data || []);
-      } catch (err) {
+      } catch {
         setAllProblems([]);
       }
     }
@@ -90,7 +90,7 @@ function NewContest() {
         problems: selectedProblems,
       }, { withCredentials: true });
       setDescription(res.data.description || '');
-    } catch (err) {
+    } catch {
       setError('AI completion failed');
     }
     setAiLoading(false);

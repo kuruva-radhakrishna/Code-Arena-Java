@@ -40,7 +40,7 @@ function EditContest() {
           points[p.problem_id._id || p.problem_id] = p.points;
         });
         setProblemPoints(points);
-      } catch (err) {
+      } catch {
         setError('Failed to load contest or problems');
       }
       setLoading(false);
@@ -121,7 +121,7 @@ function EditContest() {
         problems: selectedProblems,
       }, { withCredentials: true });
       setDescription(res.data.description || '');
-    } catch (err) {
+    } catch {
       setError('AI completion failed');
     }
     setAiLoading(false);

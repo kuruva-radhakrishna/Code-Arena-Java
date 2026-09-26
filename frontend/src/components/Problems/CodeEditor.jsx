@@ -1,7 +1,7 @@
 import React from 'react';
 import MonacoEditor from '@monaco-editor/react';
 
-function CodeEditor({ value, onChange, language = 'cpp', placeholder = 'Write your code here...' }) {
+function CodeEditor({ value, onChange, language = 'cpp' }) {
   return (
     <div style={{ width: '100%' }}>
       <label style={{

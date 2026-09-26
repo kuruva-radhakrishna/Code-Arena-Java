@@ -22,7 +22,8 @@ function Contests() {
                     withCredentials: true,
                 });
                 setContests(result.data);
-            } catch (error) {
+            } catch {
+                // ignore, contests list just stays empty
             } finally {
                 setLoading(false);
             }

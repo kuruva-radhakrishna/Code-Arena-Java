@@ -91,7 +91,7 @@ function ContestProblemView() {
                 );
             }
             setSubmissions(filtered);
-        } catch (error) {
+        } catch {
             setSubmissions([]);
         }
     };
@@ -141,7 +141,7 @@ function ContestProblemView() {
             if (result.data.errorType) {
                 setOutput(result.data.errorType);
             }
-        } catch (error) {
+        } catch {
             setOutput('Run failed.');
         }
         setRunLoading(false);

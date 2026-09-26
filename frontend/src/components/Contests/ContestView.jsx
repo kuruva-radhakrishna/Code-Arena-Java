@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useParams, Link, Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import "./ContestView.css";
 import ReactMarkdown from 'react-markdown';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -164,7 +164,7 @@ function LeaderboardSection({ contestId }) {
                     { withCredentials: true }
                 );
                 setLeaderboard(res.data);
-            } catch (err) {
+            } catch {
                 setLeaderboard([]);
             }
             setLoading(false);

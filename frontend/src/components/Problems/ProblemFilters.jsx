@@ -25,7 +25,6 @@ const difficultyLabels = [
 
 function ProblemFilters({
   problems = [],
-  solvedSet = new Set(),
   selectedTopic,
   setSelectedTopic,
   selectedDifficulty,

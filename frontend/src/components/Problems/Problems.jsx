@@ -21,7 +21,6 @@ function Problems() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(true);
-    const [sortDir, setSortDir] = useState(null); // null, 'asc', 'desc'
     const [submissions, setSubmissions] = useState([]);
     const { user } = useAuth();
     const [solvedSet, setSolvedSet] = useState(new Set());
@@ -45,7 +44,7 @@ function Problems() {
                 } else {
                     setProblems(result.data);
                 }
-            } catch (error) {
+            } catch {
                 setError("Loading issues. Please try again later.");
                 setProblems([]);
             } finally {
@@ -69,7 +68,7 @@ function Problems() {
             try {
                 const res = await axios.get(`${BACKEND_URL}/submissions/`, { withCredentials: true });
                 setSubmissions(res.data || []);
-            } catch (err) {
+            } catch {
                 setSubmissions([]);
             }
         };

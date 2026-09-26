@@ -18,7 +18,7 @@ function ProblemDiscussion({ problemId }) {
         try {
             const res = await axios.get(`${BACKEND_URL}/problems/${problemId}/discussions`, { withCredentials: true });
             setDiscussions(res.data);
-        } catch (err) {
+        } catch {
             setError('Failed to load discussions.');
         } finally {
             setLoading(false);
@@ -39,7 +39,7 @@ function ProblemDiscussion({ problemId }) {
             await axios.post(`${BACKEND_URL}/problems/${problemId}/discussions`, { comment }, { withCredentials: true });
             setComment('');
             fetchDiscussions();
-        } catch (err) {
+        } catch {
             setPostError('Failed to post discussion.');
         } finally {
             setPosting(false);

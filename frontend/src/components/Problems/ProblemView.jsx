@@ -1,7 +1,7 @@
-import { Routes, Route, Link, useParams, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import ProblemDescription from "./ProblemDescription";
 import ProblemSubmissions from "./ProblemSubmissions";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import './ProblemView.css';
 import CodeEditor from './CodeEditor';
@@ -67,7 +67,7 @@ function Problem(props) {
             } else {
                 setSubmissions([]);
             }
-        } catch (error) {
+        } catch {
             setSubmissions([]);
         }
     };
@@ -85,7 +85,7 @@ function Problem(props) {
                 } else {
                     setProblem(result.data);
                 }
-            } catch (err) {
+            } catch {
                 alert("Problem fetch error.");
                 Navigate("/problems");
             }
@@ -113,7 +113,7 @@ function Problem(props) {
             if (result.data.errorType) {
                 setOutput(result.data.errorType);
             }
-        } catch (error) {
+        } catch {
             setOutput('Run failed.');
         }
         setRunLoading(false);
@@ -147,7 +147,7 @@ function Problem(props) {
             );
             setReview(result.data.review);
             setAIReviewClicked(false);
-        } catch (error) {
+        } catch {
             setReview('AI review failed.');
             setAIReviewClicked(false);
         }
@@ -161,7 +161,7 @@ function Problem(props) {
                 problemDescription: problem.problemDescription
             }, { withCredentials: true });
             setDebugResult(result.data.debug);
-        } catch (error) {
+        } catch {
             setDebugResult('AI debug failed.');
         }
         setDebugLoading(false);
