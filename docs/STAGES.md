@@ -7,7 +7,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 0 | Scaffold: monorepo layout, root docs, CI skeleton, Docker Compose (Mongo) | ✅ done | |
 | 1 | Backend foundation: Spring Boot app, MongoDB, `User` model, JWT auth (register/login/me), Spring Security, tests | ✅ done | see `backend/README.md` |
 | 2 | Problems module: entity + read endpoints (list/detail/discussions) + tests | ✅ done | create/update/delete land in Stage 6 (Admin) |
-| 3 | Contests module: entity + join/leaderboard logic + tests | pending | |
+| 3 | Contests module: entity + leaderboard logic + tests | ✅ done | no explicit "join" step — a leaderboard entry is created on first submission (Stage 4) |
 | 4 | Submissions module: entity, run/submit endpoints, compiler client, verdict logic + tests | pending | |
 | 5 | AI module: Gemini-based review/debug endpoints (mocked in tests) | pending | |
 | 6 | Admin module: role-gated management endpoints | pending | |
@@ -34,7 +34,16 @@ Each stage is implemented and committed independently, with tests, before moving
   marked public. And the original had two overlapping listing endpoints (`/problems/all` and `/problems/`)
   where the "all" one let any logged-in user bypass the anti-cheat filtering meant to hide problems currently
   locked in a live contest — the rewrite has a single `GET /api/problems` endpoint instead; the contest-lock
-  filtering itself is added in Stage 3 once the Contest entity exists.
+  filtering itself is added in Stage 3 once the Contest entity exists (now done).
+- **Leaderboard storage**: the original embedded a full 2D array of submission copies on each leaderboard
+  entry (and wrote a `lastSubmission` field never declared in its schema). The rewrite instead keeps only
+  per-problem points, per-problem first-solved timestamps, and the latest submission timestamp — enough to
+  render and rank the leaderboard without duplicating submission history. Ties are broken by earliest last
+  submission, matching the original's intent (finishing a given score sooner ranks higher).
+- **Shared `Discussion` type**: the original duplicated an identical comment-thread subdocument schema on
+  both `Problem` and `Contest`; the rewrite defines it once and reuses it. The original also never exposed a
+  create-discussion endpoint for contests (only for problems) — the rewrite preserves that asymmetry rather
+  than inventing new scope.
 - **Verification**: this environment has no local JDK/Maven/Docker, and downloads from GitHub's release-asset
   CDN are blocked by network policy. Toolchains are declared in Dockerfiles/CI, not installed on the host —
   every stage's tests run via GitHub Actions, which provides Java, Maven, and Docker out of the box.

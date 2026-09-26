@@ -1,4 +1,4 @@
-package com.codearena.backend.problem;
+package com.codearena.backend.discussion;
 
 import java.time.Instant;
 
@@ -7,6 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Embeddable comment thread entry, shared by both problems and contests
+ * (the original app duplicated this same shape on each entity separately).
+ */
 @Data
 @Builder
 @NoArgsConstructor

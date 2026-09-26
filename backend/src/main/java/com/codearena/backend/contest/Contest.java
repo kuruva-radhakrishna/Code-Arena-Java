@@ -1,4 +1,4 @@
-package com.codearena.backend.problem;
+package com.codearena.backend.contest;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,47 +15,45 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document(collection = "problems")
+@Document(collection = "contests")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Problem {
+public class Contest {
 
     @Id
     private String id;
 
     @Indexed(unique = true)
-    private String problemName;
+    private String contestTitle;
 
-    private String description;
-
-    @Builder.Default
-    private List<String> constraints = new ArrayList<>();
+    private String createdBy;
 
     @Builder.Default
-    private List<TestCase> testCases = new ArrayList<>();
+    private List<ContestProblem> problems = new ArrayList<>();
+
+    private Instant startTime;
+
+    private Instant endTime;
 
     @Builder.Default
-    private Difficulty difficulty = Difficulty.MEDIUM;
+    private String description = "";
 
     @Builder.Default
-    private List<String> topics = new ArrayList<>();
-
-    @Builder.Default
-    private List<String> hints = new ArrayList<>();
+    private List<LeaderboardEntry> leaderBoard = new ArrayList<>();
 
     @Builder.Default
     private List<Discussion> discussions = new ArrayList<>();
 
     @Builder.Default
-    private int likes = 0;
-
-    @Builder.Default
-    private int dislikes = 0;
-
-    private String createdBy;
-
-    @Builder.Default
     private Instant createdAt = Instant.now();
+
+    public boolean hasStarted(Instant now) {
+        return !now.isBefore(startTime);
+    }
+
+    public boolean isLive(Instant now) {
+        return !now.isBefore(startTime) && !now.isAfter(endTime);
+    }
 }

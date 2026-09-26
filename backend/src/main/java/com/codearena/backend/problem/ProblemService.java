@@ -3,33 +3,51 @@ package com.codearena.backend.problem;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import com.codearena.backend.contest.ContestProblem;
+import com.codearena.backend.contest.ContestRepository;
+import com.codearena.backend.discussion.AddDiscussionRequest;
+import com.codearena.backend.discussion.Discussion;
+import com.codearena.backend.discussion.DiscussionResponse;
 import com.codearena.backend.exception.ResourceNotFoundException;
-import com.codearena.backend.problem.dto.AddDiscussionRequest;
-import com.codearena.backend.problem.dto.DiscussionResponse;
 import com.codearena.backend.problem.dto.ProblemDetailResponse;
 import com.codearena.backend.problem.dto.ProblemSummaryResponse;
-import com.codearena.backend.user.User;
-import com.codearena.backend.user.UserRepository;
+import com.codearena.backend.user.UserService;
 import com.codearena.backend.user.dto.UserSummary;
 
 @Service
 public class ProblemService {
 
     private final ProblemRepository problemRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final ContestRepository contestRepository;
 
-    public ProblemService(ProblemRepository problemRepository, UserRepository userRepository) {
+    public ProblemService(ProblemRepository problemRepository, UserService userService,
+            ContestRepository contestRepository) {
         this.problemRepository = problemRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
+        this.contestRepository = contestRepository;
     }
 
+    /**
+     * Lists every problem except those currently locked inside a live contest
+     * (so users can't practice a contest's problems while it's still running).
+     */
     public List<ProblemSummaryResponse> listAll() {
-        return problemRepository.findAll().stream().map(ProblemSummaryResponse::from).toList();
+        Set<String> lockedProblemIds = contestRepository.findLiveContests(Instant.now()).stream()
+                .flatMap(contest -> contest.getProblems().stream())
+                .map(ContestProblem::getProblemId)
+                .collect(Collectors.toSet());
+
+        return problemRepository.findAll().stream()
+                .filter(problem -> !lockedProblemIds.contains(problem.getId()))
+                .map(ProblemSummaryResponse::from)
+                .toList();
     }
 
     public ProblemDetailResponse getById(String id) {
@@ -38,7 +56,8 @@ public class ProblemService {
 
     public List<DiscussionResponse> getDiscussions(String problemId) {
         Problem problem = findProblemOrThrow(problemId);
-        Map<String, UserSummary> usersById = resolveUserSummaries(problem.getDiscussions());
+        Map<String, UserSummary> usersById = userService.summarize(
+                problem.getDiscussions().stream().map(Discussion::getUserId).toList());
 
         return problem.getDiscussions().stream()
                 .map(discussion -> DiscussionResponse.from(discussion, usersById.get(discussion.getUserId())))
@@ -57,19 +76,15 @@ public class ProblemService {
         problem.getDiscussions().addFirst(discussion);
         problemRepository.save(problem);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return DiscussionResponse.from(discussion, UserSummary.from(user));
+        UserSummary author = userService.summarize(List.of(userId)).get(userId);
+        if (author == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
+        return DiscussionResponse.from(discussion, author);
     }
 
     Problem findProblemOrThrow(String id) {
         return problemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Problem not found"));
-    }
-
-    private Map<String, UserSummary> resolveUserSummaries(List<Discussion> discussions) {
-        List<String> userIds = discussions.stream().map(Discussion::getUserId).distinct().toList();
-        return userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getId, UserSummary::from));
     }
 }

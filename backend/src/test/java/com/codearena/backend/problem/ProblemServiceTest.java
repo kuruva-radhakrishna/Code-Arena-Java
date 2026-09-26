@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,14 +16,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.codearena.backend.contest.Contest;
+import com.codearena.backend.contest.ContestProblem;
+import com.codearena.backend.contest.ContestRepository;
+import com.codearena.backend.discussion.AddDiscussionRequest;
+import com.codearena.backend.discussion.Discussion;
+import com.codearena.backend.discussion.DiscussionResponse;
 import com.codearena.backend.exception.ResourceNotFoundException;
-import com.codearena.backend.problem.dto.AddDiscussionRequest;
-import com.codearena.backend.problem.dto.DiscussionResponse;
 import com.codearena.backend.problem.dto.ProblemDetailResponse;
 import com.codearena.backend.problem.dto.ProblemSummaryResponse;
 import com.codearena.backend.user.Role;
 import com.codearena.backend.user.User;
-import com.codearena.backend.user.UserRepository;
+import com.codearena.backend.user.UserService;
+import com.codearena.backend.user.dto.UserSummary;
 
 @ExtendWith(MockitoExtension.class)
 class ProblemServiceTest {
@@ -31,13 +37,16 @@ class ProblemServiceTest {
     private ProblemRepository problemRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
+
+    @Mock
+    private ContestRepository contestRepository;
 
     private ProblemService problemService;
 
     @BeforeEach
     void setUp() {
-        problemService = new ProblemService(problemRepository, userRepository);
+        problemService = new ProblemService(problemRepository, userService, contestRepository);
     }
 
     private Problem sampleProblem() {
@@ -65,6 +74,23 @@ class ProblemServiceTest {
     }
 
     @Test
+    void listAll_excludesProblemsCurrentlyLockedInALiveContest() {
+        Problem lockedProblem = sampleProblem();
+        Problem freeProblem = Problem.builder().id("problem-2").problemName("Reverse String").build();
+        when(problemRepository.findAll()).thenReturn(List.of(lockedProblem, freeProblem));
+
+        Contest liveContest = Contest.builder()
+                .id("contest-1")
+                .problems(List.of(ContestProblem.builder().problemId("problem-1").build()))
+                .build();
+        when(contestRepository.findLiveContests(any())).thenReturn(List.of(liveContest));
+
+        List<ProblemSummaryResponse> result = problemService.listAll();
+
+        assertThat(result).extracting(ProblemSummaryResponse::id).containsExactly("problem-2");
+    }
+
+    @Test
     void getById_hidesNonPublicTestCases() {
         when(problemRepository.findById("problem-1")).thenReturn(Optional.of(sampleProblem()));
 
@@ -89,7 +115,7 @@ class ProblemServiceTest {
 
         when(problemRepository.findById("problem-1")).thenReturn(Optional.of(problem));
         User author = User.builder().id("user-2").firstname("Grace").lastname("Hopper").email("grace@example.com").role(Role.USER).build();
-        when(userRepository.findById("user-2")).thenReturn(Optional.of(author));
+        when(userService.summarize(List.of("user-2"))).thenReturn(Map.of("user-2", UserSummary.from(author)));
 
         DiscussionResponse response = problemService.addDiscussion("problem-1", "user-2", new AddDiscussionRequest("new comment"));
 
@@ -101,13 +127,23 @@ class ProblemServiceTest {
     }
 
     @Test
+    void addDiscussion_throws_whenAuthorNoLongerExists() {
+        Problem problem = sampleProblem();
+        when(problemRepository.findById("problem-1")).thenReturn(Optional.of(problem));
+        when(userService.summarize(List.of("ghost-user"))).thenReturn(Map.of());
+
+        assertThatThrownBy(() -> problemService.addDiscussion("problem-1", "ghost-user", new AddDiscussionRequest("hi")))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
     void getDiscussions_resolvesEachCommenter() {
         Problem problem = sampleProblem();
         problem.getDiscussions().add(Discussion.builder().id("d-1").userId("user-1").comment("hi").build());
 
         when(problemRepository.findById("problem-1")).thenReturn(Optional.of(problem));
         User commenter = User.builder().id("user-1").firstname("Ada").lastname("Lovelace").email("ada@example.com").role(Role.USER).build();
-        when(userRepository.findAllById(any())).thenReturn(List.of(commenter));
+        when(userService.summarize(any())).thenReturn(Map.of("user-1", UserSummary.from(commenter)));
 
         List<DiscussionResponse> responses = problemService.getDiscussions("problem-1");
 

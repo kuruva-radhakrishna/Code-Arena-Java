@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codearena.backend.problem.dto.AddDiscussionRequest;
-import com.codearena.backend.problem.dto.DiscussionResponse;
+import com.codearena.backend.discussion.AddDiscussionRequest;
+import com.codearena.backend.discussion.DiscussionResponse;
 import com.codearena.backend.problem.dto.ProblemDetailResponse;
 import com.codearena.backend.problem.dto.ProblemSummaryResponse;
 import com.codearena.backend.security.AuthenticatedUser;

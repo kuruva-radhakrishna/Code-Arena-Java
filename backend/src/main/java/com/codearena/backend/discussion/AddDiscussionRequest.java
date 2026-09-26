@@ -1,4 +1,4 @@
-package com.codearena.backend.problem.dto;
+package com.codearena.backend.discussion;
 
 import jakarta.validation.constraints.NotBlank;
 

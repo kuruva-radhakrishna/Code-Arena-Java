@@ -1,8 +1,7 @@
-package com.codearena.backend.problem.dto;
+package com.codearena.backend.discussion;
 
 import java.time.Instant;
 
-import com.codearena.backend.problem.Discussion;
 import com.codearena.backend.user.dto.UserSummary;
 
 public record DiscussionResponse(

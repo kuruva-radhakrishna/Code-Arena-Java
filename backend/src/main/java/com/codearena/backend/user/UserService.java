@@ -1,5 +1,9 @@
 package com.codearena.backend.user;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +15,7 @@ import com.codearena.backend.user.dto.AuthResponse;
 import com.codearena.backend.user.dto.LoginRequest;
 import com.codearena.backend.user.dto.RegisterRequest;
 import com.codearena.backend.user.dto.UserResponse;
+import com.codearena.backend.user.dto.UserSummary;
 
 @Service
 public class UserService {
@@ -58,5 +63,11 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return UserResponse.from(user);
+    }
+
+    /** Bulk-resolves user ids (e.g. from discussions or a leaderboard) to their public summaries. */
+    public Map<String, UserSummary> summarize(Collection<String> userIds) {
+        return userRepository.findAllById(userIds.stream().distinct().toList()).stream()
+                .collect(Collectors.toMap(User::getId, UserSummary::from));
     }
 }

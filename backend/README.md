@@ -51,3 +51,14 @@ Authentication is stateless JWT bearer tokens (`Authorization: Bearer <token>`),
 - `POST /api/problems/{id}/discussions` — requires auth → `{comment}` → `201` with the new discussion.
 
 Creating/editing/deleting problems is an admin-only action, added in Stage 6.
+
+## Contests
+
+- `GET /api/contests` — requires auth → summaries of every contest (title, description, window, problem count).
+- `GET /api/contests/{id}` — requires auth → full detail (problems sorted by points ascending, ranked
+  leaderboard, discussions). Non-creators get `403` until the contest has started; the creator can always view it.
+- `GET /api/contests/{id}/leaderboard` — requires auth → the same ranked leaderboard on its own, sorted by
+  total points descending, ties broken by earliest last-submission time.
+
+There's no separate "join" endpoint — a leaderboard entry is created the first time a user submits to one of
+the contest's problems (Stage 4). Creating/editing/deleting contests is admin-only, added in Stage 6.
