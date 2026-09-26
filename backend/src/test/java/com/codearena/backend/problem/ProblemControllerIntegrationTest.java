@@ -23,7 +23,7 @@ import com.codearena.backend.security.JwtService;
 import com.codearena.backend.user.Role;
 import com.codearena.backend.user.User;
 import com.codearena.backend.user.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc

@@ -69,6 +69,20 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!--
+			jjwt-jackson's JacksonSerializer/JacksonDeserializer are built on Jackson 2
+			(com.fasterxml.jackson.core), not the Jackson 3 (tools.jackson.core) that Spring
+			Boot 4 ships by default - jjwt 0.12.x predates Jackson 3. Spring Boot's BOM no
+			longer manages a Jackson 2 databind version, so it must be declared explicitly
+			or jjwt-jackson fails at runtime with NoClassDefFoundError. Our own code uses
+			Jackson 3 (tools.jackson.databind.ObjectMapper) directly and never touches this.
+		-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.19.0</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb-test</artifactId>
