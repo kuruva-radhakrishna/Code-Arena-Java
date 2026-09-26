@@ -16,6 +16,7 @@ code-arena-java/
   frontend/    React + Vite + MUI single-page app
   infra/       Local dev support files (Mongo init scripts, etc.)
   docker-compose.yml   Full local dev stack (Mongo, backend, compiler, frontend)
+  render.yaml          Render Blueprint for the backend + compiler service
 ```
 
 ## Tech stack
@@ -51,6 +52,11 @@ Each module also has its own README for running it standalone, outside Compose:
 - `backend/README.md`
 - `compiler/README.md`
 - `frontend/README.md`
+
+## Deployment
+
+Frontend on Vercel, backend + compiler service on Render, database on MongoDB Atlas. See
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full walkthrough.
 
 ## Status
 

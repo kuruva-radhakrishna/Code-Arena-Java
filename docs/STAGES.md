@@ -14,7 +14,7 @@ Each stage is implemented and committed independently, with tests, before moving
 | 7 | Compiler service (Java): execution engine for C/C++/Java/Python + tests | ✅ done | see `compiler/README.md`; its Dockerfile lands in Stage 9 |
 | 8 | Frontend adaptation: JWT auth instead of session cookies, updated API base URLs/env vars | ✅ done | see `frontend/README.md`; kept the frontend structurally identical, only the data layer changed |
 | 9 | Dockerization: backend/compiler/frontend Dockerfiles + full docker-compose stack | ✅ done | |
-| 10 | Deploy configs: `render.yaml`, `vercel.json`, MongoDB Atlas setup docs | pending | |
+| 10 | Deploy configs: `render.yaml`, `vercel.json`, MongoDB Atlas setup docs | ✅ done | see `docs/DEPLOYMENT.md` |
 | 11 | Polish: README overhaul, final smoke-test pass | pending | |
 
 ## Design decisions vs. the original app
@@ -145,3 +145,25 @@ Each stage is implemented and committed independently, with tests, before moving
   downloading and reading the actual `spring-boot-mongodb` 4.1.1 sources from Maven Central, the same technique
   used earlier in this project for other Spring Boot 4 breaking changes. Fixed by renaming the property to
   `spring.mongodb.uri`.
+- **Actuator added in Stage 10, health endpoint only**: neither service had any way to answer a health check
+  (no `/`, no actuator) — Render's health check would have seen a 404/401 and never marked either service
+  live. `spring-boot-starter-actuator` now exposes only `GET /actuator/health` (`management.endpoints.web
+  .exposure.include=health`), and the backend explicitly `permitAll`s it in `SecurityConfig` since it must be
+  reachable without a JWT. The compiler service has no Spring Security at all, so the endpoint is public there
+  by default.
+- **`COMPILER_URL` on Render is a plain value, not `fromService`**: Render's `fromService` env var linking only
+  exposes a bare hostname or `host:port`, with no way to add the `https://` scheme the compiler client needs —
+  so `render.yaml` just hardcodes the compiler service's predictable default URL
+  (`https://code-arena-compiler.onrender.com`) as a plain value, documented as needing an update if that service
+  is ever renamed.
+- **`JWT_SECRET` uses Render's `generateValue: true`**: Render generates and stores a random secret itself at
+  first deploy, so there's no manual step (and no temptation to reuse the insecure local-dev default) the way
+  there would be with a plain `sync: false` env var.
+- **`MONGODB_URI` and `CORS_ALLOWED_ORIGINS` stay `sync: false`**: both depend on things that don't exist until
+  you've done something outside this repo (an Atlas cluster; a deployed Vercel URL), so `render.yaml` can't fill
+  them in — `docs/DEPLOYMENT.md` walks through getting each value and where to paste it.
+- **`vercel.json` lives in `frontend/`, not the repo root**: Vercel's "Root Directory" project setting is what
+  makes this a working monorepo deploy, and config files are resolved relative to that root, not the git root.
+  It only needs an SPA rewrite (`/(.*)` → `/index.html`) — the frontend uses React Router's `BrowserRouter`, so
+  a direct load or refresh of a client-side route like `/problems/123` would otherwise 404 against Vercel's
+  static file server.

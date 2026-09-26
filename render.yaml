@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: code-arena-backend
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8080
+      # Set this to your MongoDB Atlas connection string (see docs/DEPLOYMENT.md).
+      - key: MONGODB_URI
+        sync: false
+      # Render generates a random value for you - no need to fill this in.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION_MS
+        value: 604800000
+      # Set this to your deployed Vercel frontend URL once you have it, e.g.
+      # https://code-arena-java.vercel.app (comma-separate more than one origin).
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      # Default assumes the compiler service below keeps its render.yaml name -
+      # update if you rename it.
+      - key: COMPILER_URL
+        value: https://code-arena-compiler.onrender.com
+      # Optional - leave unset if you don't need the AI features. The app
+      # still starts fine without it.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+
+  - type: web
+    name: code-arena-compiler
+    runtime: docker
+    plan: free
+    rootDir: compiler
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: EXECUTION_TIMEOUT_MS
+        value: 10000
