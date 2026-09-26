@@ -1,0 +1,6 @@
+body {
+    padding-top: 56px; /* adjust if your navbar height is different */
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa; /* optional: subtle background */
+}

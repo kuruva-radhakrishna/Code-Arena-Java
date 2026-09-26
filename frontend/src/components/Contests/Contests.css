@@ -1,0 +1,119 @@
+.contest-view {
+  padding: 32px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.contest-category {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 48px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.contest-category h2 {
+  margin-bottom: 24px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.no-contests {
+  margin: 24px 0 32px 0;
+  font-size: 1.15rem;
+  color: #555;
+  text-align: center;
+}
+
+.contest-view table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.contest-view th, .contest-view td {
+  padding: 18px 22px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  font-size: 1.08rem;
+}
+
+.contest-view th {
+  background: #222;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.12rem;
+}
+
+.contest-view tr:last-child td {
+  border-bottom: none;
+}
+
+.contest-title-link {
+  color: #2d3a8c;
+  font-weight: 600;
+  font-size: 1.08rem;
+  text-decoration: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  background: #f3f6fd;
+  box-shadow: 0 1px 4px rgba(45,58,140,0.04);
+  display: inline-block;
+}
+
+.contest-title-link:hover, .contest-title-link:focus {
+  background: #2d3a8c;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(45,58,140,0.10);
+}
+
+.create-contest-btn {
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  transition: background 0.18s, box-shadow 0.18s;
+  border: none;
+  outline: none;
+  display: inline-block;
+}
+
+.create-contest-btn:hover, .create-contest-btn:focus {
+  background: #1251a3;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .contest-category {
+    max-width: 100%;
+    padding: 0 8px;
+  }
+  .contest-view table {
+    width: 100%;
+    font-size: 0.98rem;
+  }
+  .contest-view th, .contest-view td {
+    padding: 10px 4px;
+  }
+  .contest-category h2 {
+    font-size: 1.4rem;
+  }
+} 

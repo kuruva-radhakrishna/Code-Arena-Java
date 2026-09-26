@@ -1,0 +1,17 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: code-arena-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: codearena
+    volumes:
+      - mongo-data:/data/db
+
+  # backend, compiler and frontend services are added in Stage 9 once their
+  # Dockerfiles exist (backend/Dockerfile, compiler/Dockerfile, frontend/Dockerfile).
+
+volumes:
+  mongo-data:

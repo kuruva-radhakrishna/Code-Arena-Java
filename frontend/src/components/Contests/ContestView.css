@@ -1,0 +1,311 @@
+.contest-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 36px 28px;
+  margin: 40px auto;
+  max-width: 950px;
+}
+
+.section-title {
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.countdown {
+  font-size: 1.3rem;
+  color: #d32f2f;
+  margin: 18px 0 0 0;
+  font-weight: 600;
+}
+
+.ongoing-problems, .past-problems {
+  margin-top: 36px;
+  text-align: left;
+}
+
+.problems-table, .contest-leaderboard table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 18px;
+  margin-bottom: 36px;
+  background: #f9f9f9;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.problems-table th, .problems-table td, .contest-leaderboard th, .contest-leaderboard td {
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.problems-table th, .contest-leaderboard th {
+  background: #f1f5fb;
+  color: #2d3748;
+  font-weight: 700;
+}
+
+.problems-table tr:nth-child(even), .contest-leaderboard tr:nth-child(even) {
+  background: #f6fafd;
+}
+
+.problems-table tr:nth-child(odd), .contest-leaderboard tr:nth-child(odd) {
+  background: #fff;
+}
+
+.problems-table tr:hover, .contest-leaderboard tr:hover {
+  background: #e3f2fd;
+  transition: background 0.2s;
+}
+
+.contest-leaderboard {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  padding: 0 0 24px 0;
+  margin: 32px 0 0 0;
+  max-width: 100%;
+}
+
+.contest-leaderboard .leaderboard-table-wrapper {
+  margin-top: 12px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.contest-leaderboard table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: none;
+  margin: 0;
+}
+
+.contest-leaderboard th, .contest-leaderboard td {
+  padding: 12px 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.contest-leaderboard th {
+  background: #eaf2fb;
+  color: #1976d2;
+  font-size: 1.08em;
+  font-weight: 700;
+  border: none;
+}
+
+.contest-leaderboard tr {
+  background: #fff;
+  transition: background 0.2s;
+}
+
+.contest-leaderboard tr:nth-child(even) {
+  background: #f6fafd;
+}
+
+.contest-leaderboard tr.top-1 {
+  background: #fffbe6 !important;
+}
+.contest-leaderboard tr.top-2 {
+  background: #f0f4ff !important;
+}
+.contest-leaderboard tr.top-3 {
+  background: #f9f2f2 !important;
+}
+
+.contest-leaderboard td.rank-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: 0 8px;
+}
+
+.rank-stack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.trophy {
+  font-size: 1.3em;
+  margin-right: 2px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.rank-number {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #444;
+  margin-left: 2px;
+}
+
+.rank-user {
+  font-size: 1.05em;
+  font-weight: 500;
+  color: #222;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  background: #e3eaf7;
+  color: #1976d2;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.97em;
+  margin: 2px 4px 2px 0;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.problem-link {
+  color: #2b6cb0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.problem-link:hover {
+  color: #1a365d;
+  text-decoration: underline;
+}
+
+.contest-future, .contest-ongoing, .contest-past {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.10);
+  padding: 36px 28px;
+  margin: 40px auto;
+  max-width: 950px;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .contest-container, .contest-future, .contest-ongoing, .contest-past {
+    padding: 16px 4px;
+    max-width: 99vw;
+  }
+  .problems-table th, .problems-table td, .contest-leaderboard th, .contest-leaderboard td {
+    padding: 8px 6px;
+    font-size: 0.98em;
+  }
+}
+
+.leaderboard-section {
+  margin: 32px auto 0 auto;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 24px 24px 32px 24px;
+}
+
+.leaderboard-card {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.leaderboard-card table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: none;
+}
+
+.leaderboard-card th, .leaderboard-card td {
+  padding: 12px 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.leaderboard-card th {
+  background: #eaf2fb;
+  color: #1976d2;
+  font-size: 1.08em;
+  font-weight: 700;
+  border: none;
+}
+
+.leaderboard-card tr {
+  background: #f8fbff;
+  transition: background 0.2s;
+}
+
+.leaderboard-card tr.top-1 {
+  background: #fffbe6 !important;
+}
+.leaderboard-card tr.top-2 {
+  background: #f0f4ff !important;
+}
+.leaderboard-card tr.top-3 {
+  background: #f9f2f2 !important;
+}
+
+.leaderboard-card tr:not(.top-1):not(.top-2):not(.top-3):hover {
+  background: #f0f6ff;
+}
+
+.leaderboard-table-wrapper {
+  margin-top: 18px;
+  width: 100%;
+  display: block;
+}
+
+.contest-rules-section {
+  background: #f6f8fa;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 24px 18px 18px 18px;
+  margin: 18px auto 36px auto;
+  width: 100%;
+  max-width: 900px;
+  text-align: left;
+}
+
+.contest-rules-section .section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #2d3a8c;
+  text-align: left;
+}
+
+.contest-rules-list {
+  margin: 0 0 10px 0;
+  padding-left: 22px;
+  color: #333;
+  font-size: 1.08rem;
+  text-align: left;
+}
+
+.contest-rules-list li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.contest-description {
+  margin: 10px 0 8px 0;
+  font-size: 1.07rem;
+  color: #444;
+  text-align: left;
+}
+
+.leaderboard-info {
+  margin-top: 8px;
+  font-size: 1.04rem;
+  color: #2d3a8c;
+  background: #eaf0fb;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-weight: 500;
+  text-align: left;
+} 

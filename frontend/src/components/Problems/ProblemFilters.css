@@ -1,0 +1,115 @@
+.problem-filters-container {
+  margin-bottom: 24px;
+}
+
+.problem-topic-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0;
+  padding-bottom: 2px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.topic-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #f5f7fa;
+  color: #222;
+  border: 1.2px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+  outline: none;
+  gap: 4px;
+  height: 22px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+.topic-pill:last-child {
+  margin-right: 0;
+}
+.topic-pill .topic-badge {
+  background: #e0e0e0;
+  color: #555;
+  border-radius: 8px;
+  font-size: 0.75em;
+  padding: 0 4px;
+  margin-left: 3px;
+  font-weight: 600;
+}
+.topic-pill.active, .topic-pill:focus, .topic-pill:hover {
+  background: #ffa116;
+  color: #fff;
+  border: 1.2px solid #ffa116;
+}
+.topic-pill.active .topic-badge, .topic-pill:focus .topic-badge, .topic-pill:hover .topic-badge {
+  background: #fff;
+  color: #ffa116;
+}
+.topic-pill svg {
+  color: inherit;
+  font-size: 0.95em;
+}
+
+.problem-difficulty-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.difficulty-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #f5f7fa;
+  color: #222;
+  border: 1.2px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+  outline: none;
+  gap: 4px;
+  height: 22px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+.difficulty-pill:last-child {
+  margin-right: 0;
+}
+.difficulty-pill.active, .difficulty-pill:focus, .difficulty-pill:hover {
+  background: #ffa116;
+  color: #fff;
+  border: 1.2px solid #ffa116;
+}
+.difficulty-pill svg {
+  color: inherit;
+  font-size: 0.95em;
+}
+
+/* Light mode support (already light by default) */
+
+/* Hide scroll bar but allow scroll */
+.problem-topic-bar::-webkit-scrollbar {
+  display: none;
+}
+.problem-topic-bar::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 6px;
+}
+.problem-difficulty-bar::-webkit-scrollbar {
+  display: none;
+}
+.problem-difficulty-bar::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 6px;
+} 

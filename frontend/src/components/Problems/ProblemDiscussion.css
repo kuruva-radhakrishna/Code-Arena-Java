@@ -1,0 +1,125 @@
+.problem-discussion {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 28px 22px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  color: #222;
+}
+
+.problem-discussion h2, .problem-discussion h3 {
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #222;
+}
+
+.problem-discussion p {
+  margin-bottom: 14px;
+  line-height: 1.7;
+  color: #333;
+}
+
+.problem-discussion .comment {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  color: #444;
+  font-size: 0.98rem;
+}
+
+@media (max-width: 600px) {
+  .problem-discussion {
+    padding: 10px 2px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+}
+
+.discussion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.discussion-form textarea {
+  resize: none;
+  border-radius: 8px;
+  border: 1px solid #e3eafc;
+  padding: 10px 12px;
+  font-size: 1rem;
+  min-height: 60px;
+  background: #f9fafc;
+  color: #222;
+  transition: border 0.18s;
+}
+.discussion-form textarea:focus {
+  outline: none;
+  border: 1.5px solid #1976d2;
+}
+.discussion-form button {
+  align-self: flex-end;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 22px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.discussion-form button:disabled {
+  background: #b0c4de;
+  cursor: not-allowed;
+}
+.error-msg {
+  color: #e53935;
+  font-size: 0.98rem;
+  margin-top: 4px;
+}
+.discussion-list {
+  margin-top: 10px;
+}
+.comment {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  color: #444;
+  font-size: 0.98rem;
+  box-shadow: 0 1px 4px rgba(25,118,210,0.04);
+}
+.comment-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.user-avatar {
+  background: #1976d2;
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 1px 4px rgba(25,118,210,0.08);
+}
+.user-name {
+  font-weight: 600;
+  color: #1976d2;
+}
+.user-email {
+  color: #888;
+  font-size: 0.97rem;
+}
+.comment-content {
+  margin-left: 42px;
+  margin-top: 2px;
+  word-break: break-word;
+} 

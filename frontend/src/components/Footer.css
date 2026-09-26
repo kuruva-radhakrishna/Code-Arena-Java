@@ -1,0 +1,126 @@
+.footer {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  padding: 48px 0 24px 0;
+  margin-top: 60px;
+  position: relative;
+  overflow: hidden;
+  /* border-top: 2px solid #ffa116; */
+  box-shadow: 0 -4px 24px rgba(25, 118, 210, 0.08);
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.footer-left {
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1.08rem;
+  color: #b0b0b0;
+  font-weight: 500;
+}
+
+.footer-logo {
+  color: #ffa116 !important;
+  font-size: 1.7rem !important;
+  animation: pulse 2s infinite;
+}
+
+.footer-center {
+  flex: 1;
+  text-align: center;
+  font-size: 1.08rem;
+  color: #b0b0b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.heart-icon {
+  color: #ff6b6b !important;
+  font-size: 1.3rem !important;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+.footer-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 18px;
+  min-width: 200px;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.social-link {
+  color: #ffa116 !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 48px;
+  height: 48px;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.3s cubic-bezier(.4,2,.6,1) !important;
+  border: 2px solid #ffa116 !important;
+  font-size: 1.5rem !important;
+  box-shadow: 0 2px 8px rgba(255,161,22,0.10);
+}
+
+.social-link:hover {
+  color: #fff !important;
+  background: #ffa116 !important;
+  transform: translateY(-4px) scale(1.08) !important;
+  box-shadow: 0 8px 24px rgba(255, 161, 22, 0.25) !important;
+  border-color: #fff !important;
+}
+
+.social-link .MuiSvgIcon-root {
+  font-size: 1.5rem !important;
+}
+
+/* Responsive design */
+@media (max-width: 900px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 36px;
+  }
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    flex: none;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer-right {
+    align-items: center;
+  }
+  .footer-socials {
+    justify-content: center;
+  }
+} 

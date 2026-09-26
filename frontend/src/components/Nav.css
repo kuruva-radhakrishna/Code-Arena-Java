@@ -1,0 +1,207 @@
+.nav-appbar {
+  background: #fff;
+  color: #222;
+  margin: 0 !important;
+  padding: 0 100px;
+  box-shadow: 0 2px 12px rgba(25,118,210,0.06);
+  border: none;
+  border-radius: 0;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  /* position: sticky; */
+  /* top: 0; */
+  z-index: 1100;
+}
+
+@media (max-width: 900px) {
+  .nav-appbar {
+    padding: 0 16px;
+  }
+}
+
+.ca-navbar-logo-svg {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.ca-navbar-brand {
+  font-weight: 800;
+  font-size: 1.45rem;
+  color: #222;
+  letter-spacing: 1px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin-right: 18px;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-right: 28px;
+  letter-spacing: 0.5px;
+  text-decoration: none !important;
+}
+
+.nav-title {
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  text-decoration: none !important;
+  color: #222 !important;
+  margin-right: 32px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+.nav-title:hover {
+  color: #ffa116 !important;
+}
+
+.nav-link {
+  margin-left: 8px !important;
+  margin-right: 8px !important;
+  text-transform: none !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px;
+  color: #fff !important;
+  background: transparent !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 8px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px;
+}
+
+.nav-link .MuiSvgIcon-root {
+  font-size: 1.1rem !important;
+  color: #fff !important;
+}
+
+.nav-link:hover {
+  background: #f8f9fa !important;
+  color: #ffa116 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 161, 22, 0.15);
+}
+
+.nav-link:hover .MuiSvgIcon-root {
+  color: #ffa116 !important;
+}
+
+.nav-admin {
+  background: transparent !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  transition: background 0.18s, color 0.18s;
+}
+
+.nav-admin:hover {
+  background: #f8f9fa !important;
+  color: #ffa116 !important;
+}
+
+.nav-signup {
+  background: #fff3e0 !important;
+  color: #ffa116 !important;
+  border: 1px solid #ffe0b2 !important;
+  font-weight: 600 !important;
+}
+
+.nav-signup:hover {
+  background: #ffe0b2 !important;
+  color: #ff9800 !important;
+  border-color: #ffcc80 !important;
+}
+
+.nav-premium {
+  margin-left: 32px !important;
+  background: #fff7e6 !important;
+  color: #ffa116 !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 4px 18px !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.5px;
+  border: none !important;
+  transition: background 0.18s, color 0.18s;
+}
+
+.nav-premium:hover {
+  background: #ffe2b8 !important;
+  color: #ff9800 !important;
+}
+
+.MuiToolbar-root {
+  min-height: 56px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+body {
+  padding-top: 0 !important;
+}
+
+.nav-profile-circle {
+  width: 40px;
+  height: 40px;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px;
+  max-height: 40px;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  background: #f5f5f7 !important;
+  color: #ffa116 !important;
+  font-weight: 700 !important;
+  font-size: 1.2rem !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  border: none !important;
+}
+
+.nav-link.nav-profile-circle {
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: #f5f5f7 !important;
+}
+
+.nav-profile-circle:hover {
+  background: #ffe2b8 !important;
+  color: #ff9800 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 161, 22, 0.2);
+}
+
+/* Icon styling */
+.nav-admin .MuiSvgIcon-root {
+  color: #1976d2 !important;
+}
+
+.nav-signup .MuiSvgIcon-root {
+  color: #ffa116 !important;
+}
+
+.nav-profile-circle .MuiSvgIcon-root {
+  font-size: 1.3rem !important;
+  color: #ffa116 !important;
+}
+
+.nav-profile-circle:hover .MuiSvgIcon-root {
+  color: #ff9800 !important;
+}

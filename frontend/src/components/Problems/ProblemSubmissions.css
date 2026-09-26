@@ -1,0 +1,75 @@
+.problem-submissions {
+  max-width: 900px;
+  margin: 32px auto 32px 0;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+
+.problem-submissions table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.problem-submissions th, .problem-submissions td {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.problem-submissions th {
+  background: #f5f7fa;
+  color: #222;
+  font-weight: 600;
+  font-size: 1.02rem;
+  border-bottom: 2px solid #f0f1f3;
+}
+
+.problem-submissions tr {
+  transition: background 0.18s;
+}
+
+.problem-submissions tr:hover {
+  background: #f9fafc;
+}
+
+.problem-submissions td {
+  font-size: 0.98rem;
+  color: #333;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.view-code-link {
+  background: #ffa116;
+  color: #222;
+  padding: 6px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.18s, color 0.18s;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.view-code-link:hover {
+  background: #ff9800;
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .problem-submissions {
+    width: 100%;
+    margin: 16px 0 16px 0;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .problem-submissions th, .problem-submissions td {
+    padding: 7px 4px;
+    font-size: 0.93rem;
+  }
+} 

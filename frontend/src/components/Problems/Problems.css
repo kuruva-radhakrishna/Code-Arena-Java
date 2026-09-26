@@ -1,0 +1,250 @@
+.problems {
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 16px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  overflow-x: auto;
+  border: 1px solid rgba(25,118,210,0.05);
+}
+
+.problems table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.problems th, .problems td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.problems th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #1976d2;
+  font-weight: 700;
+  font-size: 1rem;
+  border-bottom: 2px solid #e3f2fd;
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.th-content .MuiSvgIcon-root {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.problems tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.problems tr:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25,118,210,0.08);
+}
+
+.problems td {
+  font-size: 0.95rem;
+  color: #333;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.problems a {
+  color: #ffa116;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.problems a:hover {
+  color: #ff9800;
+  background: rgba(255, 161, 22, 0.1);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .problems {
+    padding: 16px;
+    margin: 16px 8px;
+    border-radius: 12px;
+  }
+  .problems th, .problems td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+.difficulty-box {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  margin-right: 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.difficulty-box:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.difficulty-box.easy {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  color: #fff;
+  border-color: #43a047;
+}
+
+.difficulty-box.medium {
+  background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+  color: #fff;
+  border-color: #f57c00;
+}
+
+.difficulty-box.hard {
+  background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+  color: #fff;
+  border-color: #d32f2f;
+}
+
+.topic-tag {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin: 2px 2px 2px 0;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 6px rgba(25,118,210,0.1);
+  border: 1px solid #90caf9;
+  transition: all 0.2s ease;
+}
+
+.topic-tag:hover {
+  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25,118,210,0.2);
+}
+
+/* Fix PrismJS comment rendering in code editor */
+.prism-code, .prism-code * {
+  line-height: 1.6 !important;
+  font-family: 'Fira Mono', 'Consolas', monospace !important;
+  font-size: 1rem !important;
+  position: static !important;
+}
+
+.token.comment, .token.prolog, .token.doctype, .token.cdata {
+  color: #6a9955 !important;
+  font-style: italic;
+  position: static !important;
+  background: none !important;
+}
+
+.problem-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.solved-problem-link {
+  font-weight: 700;
+  color: #43a047 !important;
+  position: relative;
+}
+
+.solved-problem-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #43a047, #66bb6a);
+  border-radius: 1px;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.solved-problem-link:hover::after {
+  transform: scaleX(1);
+}
+
+.solved-tick {
+  color: #43a047;
+  font-size: 1em;
+  margin-left: 2px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(67, 160, 71, 0.1);
+  transition: all 0.2s ease;
+}
+
+.solved-tick:hover {
+  background: rgba(67, 160, 71, 0.2);
+  transform: scale(1.1);
+}
+
+.solved-problem-row {
+  background: linear-gradient(135deg, rgba(67, 160, 71, 0.05) 0%, rgba(76, 175, 80, 0.05) 100%);
+  border-left: 4px solid #43a047;
+}
+
+.solved-problem-row:hover {
+  background: linear-gradient(135deg, rgba(67, 160, 71, 0.1) 0%, rgba(76, 175, 80, 0.1) 100%);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .problems {
+    padding: 20px;
+    margin: 20px 8px;
+  }
+  
+  .problems th, .problems td {
+    padding: 12px 12px;
+  }
+  
+  .difficulty-box {
+    padding: 4px 12px;
+    font-size: 0.75rem;
+  }
+  
+  .topic-tag {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
+} 
