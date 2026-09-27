@@ -167,3 +167,21 @@ Each stage is implemented and committed independently, with tests, before moving
   It only needs an SPA rewrite (`/(.*)` → `/index.html`) — the frontend uses React Router's `BrowserRouter`, so
   a direct load or refresh of a client-side route like `/problems/123` would otherwise 404 against Vercel's
   static file server.
+- **The deployed backend shares the original Node app's actual database, not a fresh one**: both apps run
+  against the same Atlas cluster's `test` database (the name Mongoose defaults to when a connection string has
+  no path segment, which is exactly how the original app's `MONGOOSE_URL` was written) so problems/contests
+  created through either app are visible to both. The Java app connects with its own dedicated `code-arena-java`
+  Atlas user (`readWrite` on `test` only), not the pre-existing admin credential.
+- **`com.codearena.backend.legacydata` package: read converters that tolerate the Node app's document shapes**:
+  the two apps' schemas differ in real, deliberate ways (Stage 1-6 fixed several bugs and simplified the
+  leaderboard model), and Spring Data's default enum binding is exact-match-or-throw — reading an existing
+  `problems`/`users`/`submissions` document as-is would 500 immediately (e.g. `difficulty: "easy"` doesn't bind
+  to `Difficulty.EASY`, and `role: "admin"` doesn't bind to `Role.ADMIN`). Each entity gets a
+  `Converter<Document, T>` (registered via `MongoCustomConversions` in `config/MongoConfig.java`) that reads
+  either app's field names/casing and lower/mixed-case enum text leniently, falling back to a sensible default
+  rather than throwing. Deliberately **not** attempted: migrating old passwords (the original used
+  `passport-local-mongoose`'s salt+PBKDF2-hash scheme, a different, one-way-incompatible scheme from this app's
+  single bcrypt `passwordHash` field — pre-existing accounts simply can't log in through the new app, which the
+  user confirmed is fine) or the old contest leaderboard's embedded 2D submission-history array (no equivalent
+  in the simplified `LeaderboardEntry` from Stage 3 — old contests' metadata and problem list still load fine,
+  just not old standings).
