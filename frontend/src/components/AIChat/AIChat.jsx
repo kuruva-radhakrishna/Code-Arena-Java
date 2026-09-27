@@ -13,6 +13,19 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ForumIcon from '@mui/icons-material/Forum';
 import './AIChat.css';
 
+// The widget's own default (unexpanded) corner-anchored size/position, kept
+// within the current viewport so it doesn't overlap page content or run off
+// screen on narrower windows (e.g. a smaller laptop, or devtools open).
+const getDefaultSize = () => ({
+  width: Math.min(700, window.innerWidth - 40),
+  height: Math.min(window.innerHeight * 0.8, window.innerHeight - 40),
+});
+
+const getDefaultPosition = ({ width, height }) => ({
+  x: Math.max(20, window.innerWidth - width - 50),
+  y: Math.max(20, window.innerHeight - height - 60),
+});
+
 const AIChat = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -21,16 +34,43 @@ const AIChat = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [size, setSize] = useState({ width: 700, height: window.innerHeight * 0.8 });
-  const [position, setPosition] = useState({ x: window.innerWidth - 750, y: window.innerHeight - 600 });
+  const [size, setSize] = useState(getDefaultSize);
+  const [position, setPosition] = useState(() => getDefaultPosition(getDefaultSize()));
   const messagesEndRef = useRef(null);
   const prevSize = useRef(size);
   const prevPosition = useRef(position);
+  const sizeRef = useRef(size);
+  const positionRef = useRef(position);
 
   // Helper to get user-specific key
   const getUserKey = (base) => {
     return user && user.id ? `${base}_${user.id}` : base;
   };
+
+  useEffect(() => {
+    sizeRef.current = size;
+  }, [size]);
+
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+
+  // Keep the open widget on-screen and non-overlapping when the viewport
+  // itself changes size (window resize, or devtools opening/closing) -
+  // otherwise it stays at whatever size/position fit the old viewport.
+  useEffect(() => {
+    const handleWindowResize = () => {
+      const clampedWidth = Math.min(sizeRef.current.width, window.innerWidth - 40);
+      const clampedHeight = Math.min(sizeRef.current.height, window.innerHeight - 40);
+      setSize({ width: clampedWidth, height: clampedHeight });
+      setPosition({
+        x: Math.max(20, Math.min(positionRef.current.x, window.innerWidth - clampedWidth - 20)),
+        y: Math.max(20, Math.min(positionRef.current.y, window.innerHeight - clampedHeight - 20)),
+      });
+    };
+    window.addEventListener('resize', handleWindowResize);
+    return () => window.removeEventListener('resize', handleWindowResize);
+  }, []);
 
   // Initialize with welcome message or load from localStorage
   useEffect(() => {
