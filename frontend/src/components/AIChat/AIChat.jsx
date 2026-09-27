@@ -191,6 +191,11 @@ const AIChat = () => {
       bounds="window"
       dragHandleClassName="ai-chat-header"
       enableResizing={true}
+      // react-rnd hardcodes position: absolute on its wrapper, which silently
+      // wins over the "position: fixed" in AIChat.css (inline styles always
+      // beat a class) - so the widget scrolled away with the page instead of
+      // staying pinned to the viewport like a normal floating chat widget.
+      style={{ position: 'fixed' }}
       onResizeStop={(e, direction, ref, delta, pos) => {
         setSize({ width: ref.offsetWidth, height: ref.offsetHeight });
         setPosition(pos);
