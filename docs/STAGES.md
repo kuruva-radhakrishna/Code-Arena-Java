@@ -182,6 +182,10 @@ Each stage is implemented and committed independently, with tests, before moving
   rather than throwing. Deliberately **not** attempted: migrating old passwords (the original used
   `passport-local-mongoose`'s salt+PBKDF2-hash scheme, a different, one-way-incompatible scheme from this app's
   single bcrypt `passwordHash` field — pre-existing accounts simply can't log in through the new app, which the
-  user confirmed is fine) or the old contest leaderboard's embedded 2D submission-history array (no equivalent
-  in the simplified `LeaderboardEntry` from Stage 3 — old contests' metadata and problem list still load fine,
-  just not old standings).
+  user confirmed is fine) or the old contest leaderboard's embedded 2D submission-history array. A contest's
+  leaderboard entries map this app's own field names directly (`perProblemPoints`/`perProblemSolvedAt`/
+  `lastSubmissionAt`, from Stage 3), so a contest created and updated entirely within this app - the normal
+  case, and what every integration test exercises - reads back exactly as written; only an entry actually
+  written in the old 2D-array shape comes back with an empty per-problem history instead of a throw or a lossy
+  best-effort mapping. (First version of this converter skipped `leaderBoard` entirely, which broke that normal
+  case for every contest, not just legacy ones - caught by the existing `SubmissionFlowIntegrationTest`.)

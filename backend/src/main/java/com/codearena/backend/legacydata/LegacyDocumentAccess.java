@@ -107,4 +107,40 @@ final class LegacyDocumentAccess {
         }
         return null;
     }
+
+    static List<Integer> intList(Document doc, String... keys) {
+        for (String key : keys) {
+            Object value = doc.get(key);
+            if (value instanceof List<?> list) {
+                List<Integer> result = new ArrayList<>();
+                for (Object item : list) {
+                    if (item instanceof Number n) {
+                        result.add(n.intValue());
+                    }
+                }
+                return result;
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    static List<Instant> instantList(Document doc, String... keys) {
+        for (String key : keys) {
+            Object value = doc.get(key);
+            if (value instanceof List<?> list) {
+                List<Instant> result = new ArrayList<>();
+                for (Object item : list) {
+                    if (item instanceof Date d) {
+                        result.add(d.toInstant());
+                    } else if (item instanceof Instant i) {
+                        result.add(i);
+                    } else {
+                        result.add(null);
+                    }
+                }
+                return result;
+            }
+        }
+        return new ArrayList<>();
+    }
 }
